@@ -1,0 +1,2535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Fundamentos de Enfermería — Simulador</title>
+
+<style>
+:root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #172033;
+    --muted: #687386;
+    --primary: #315efb;
+    --primary-light: #eaf0ff;
+    --border: #dce2ec;
+    --correct: #16804b;
+    --correct-bg: #eaf8f0;
+    --wrong: #c83c4b;
+    --wrong-bg: #fff0f2;
+    --shadow: 0 5px 20px rgba(20,30,50,0.07);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+    line-height: 1.5;
+}
+
+button,
+select {
+    font: inherit;
+}
+
+.container {
+    max-width: 950px;
+    margin: auto;
+    padding: 25px 16px 50px;
+}
+
+header {
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0 0 5px;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.subtitle {
+    margin: 0;
+    color: var(--muted);
+}
+
+/* EXAM TABS */
+
+.exam-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.exam-tab {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.exam-tab:hover {
+    border-color: var(--primary);
+}
+
+.exam-tab.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* TOOLBAR */
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+select,
+.button {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+}
+
+.button:hover {
+    border-color: var(--primary);
+}
+
+.button.primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.button.danger {
+    background: var(--wrong);
+    color: white;
+    border-color: var(--wrong);
+}
+
+/* PROGRESS */
+
+.progress-container {
+    margin-bottom: 20px;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+}
+
+.progress {
+    height: 9px;
+    width: 100%;
+    background: #e2e6ed;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--primary);
+    transition: width 0.25s ease;
+}
+
+/* CARD */
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+}
+
+.question-number {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.question {
+    font-size: 1.18rem;
+    font-weight: 750;
+    margin: 0 0 20px;
+}
+
+/* OPTIONS */
+
+.options {
+    display: grid;
+    gap: 11px;
+}
+
+.option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.15s;
+}
+
+.option:hover {
+    border-color: var(--primary);
+    background: #fafbff;
+}
+
+.option.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.option input {
+    margin-top: 4px;
+    accent-color: var(--primary);
+}
+
+.option-letter {
+    font-weight: 800;
+    min-width: 22px;
+}
+
+/* NAVIGATION */
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.navigation-right {
+    display: flex;
+    gap: 10px;
+}
+
+/* RESULT */
+
+.result {
+    text-align: center;
+}
+
+.result-title {
+    margin-top: 0;
+}
+
+.score {
+    font-size: 3.2rem;
+    font-weight: 850;
+    margin: 10px 0;
+}
+
+.percentage {
+    color: var(--muted);
+    font-size: 1.2rem;
+}
+
+.result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 25px 0;
+}
+
+/* REVIEW */
+
+.review {
+    margin-top: 25px;
+    display: grid;
+    gap: 12px;
+}
+
+.review-item {
+    padding: 15px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: left;
+}
+
+.review-item.correct {
+    border-left: 5px solid var(--correct);
+}
+
+.review-item.wrong {
+    border-left: 5px solid var(--wrong);
+}
+
+.review-status {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 99px;
+    margin-bottom: 8px;
+}
+
+.review-status.correct {
+    color: var(--correct);
+    background: var(--correct-bg);
+}
+
+.review-status.wrong {
+    color: var(--wrong);
+    background: var(--wrong-bg);
+}
+
+.review-question {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.answer-line {
+    font-size: 0.92rem;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.answer-line strong {
+    color: var(--text);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.feedback {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.feedback.correct {
+    background: var(--correct-bg);
+    color: var(--correct);
+}
+
+.feedback.wrong {
+    background: var(--wrong-bg);
+    color: var(--wrong);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+
+    .container {
+        padding: 18px 10px 40px;
+    }
+
+    .card {
+        padding: 17px;
+    }
+
+    .navigation {
+        flex-direction: column;
+    }
+
+    .navigation-right {
+        width: 100%;
+    }
+
+    .navigation-right button {
+        flex: 1;
+    }
+
+    .score {
+        font-size: 2.7rem;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>Fundamentos de Enfermería</h1>
+        <p class="subtitle">
+            Simulador de estudio · 3 exámenes · 120 preguntas
+        </p>
+    </header>
+
+    <!-- EXAMENES -->
+
+    <div class="exam-tabs">
+        <button class="exam-tab active" data-exam="A">
+            Examen A
+        </button>
+
+        <button class="exam-tab" data-exam="B">
+            Examen B
+        </button>
+
+        <button class="exam-tab" data-exam="C">
+            Examen C
+        </button>
+    </div>
+
+    <!-- CONFIGURACION -->
+
+    <div class="toolbar">
+
+        <label>
+            <strong>Corrección:</strong>
+
+            <select id="correctionMode">
+
+                <option value="final">
+                    Corregir al finalizar
+                </option>
+
+                <option value="instant">
+                    Corregir inmediatamente
+                </option>
+
+            </select>
+        </label>
+
+        <button class="button" id="restartButton">
+            Reiniciar examen
+        </button>
+
+    </div>
+
+    <!-- PROGRESO -->
+
+    <div class="progress-container">
+
+        <div class="progress-info">
+
+            <span id="progressText">
+                Pregunta 1 de 40
+            </span>
+
+            <span id="answeredText">
+                Respondidas: 0/40
+            </span>
+
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+    </div>
+
+    <!-- CONTENIDO -->
+
+    <main class="card" id="quizContainer"></main>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   BANCO DE PREGUNTAS
+   ========================================================= */
+
+const EXAMS = {
+
+A: [
+
+{
+q:"¿Qué distingue principalmente al conocimiento enfermero del conocimiento médico según el material?",
+o:[
+"Se limita al diagnóstico",
+"Se centra exclusivamente en farmacología",
+"Posee un conocimiento propio orientado al cuidado",
+"Reemplaza el conocimiento médico"
+],
+a:2
+},
+
+{
+q:"En la perspectiva de Nightingale, ¿qué elemento pertenece directamente al entorno terapéutico?",
+o:[
+"Ventilación",
+"Genética",
+"Diagnóstico médico",
+"Prescripción farmacológica"
+],
+a:0
+},
+
+{
+q:"¿Cuál es el objetivo del entorno como prescripción?",
+o:[
+"Sustituir completamente al paciente",
+"Conservar la energía vital y permitir que la naturaleza actúe",
+"Eliminar toda intervención enfermera",
+"Aumentar la dependencia"
+],
+a:1
+},
+
+{
+q:"Una habitación con aire viciado y ausencia de luz solar representa principalmente un problema desde el lente de:",
+o:[
+"Henderson",
+"Benner",
+"Nightingale",
+"Carper"
+],
+a:2
+},
+
+{
+q:"¿Cuál corresponde al manejo ambiental planteado en el material?",
+o:[
+"Ruido constante",
+"Aire puro sin enfriar",
+"Oscuridad permanente",
+"Alimentación sin horarios"
+],
+a:1
+},
+
+{
+q:"Según la matriz teórica, Nightingale centra su mirada principalmente en:",
+o:[
+"La habitación y el hábitat",
+"Las etapas profesionales",
+"La ética profesional",
+"La subjetividad del cuidador"
+],
+a:0
+},
+
+{
+q:"¿Cuál es una característica del modelo médico presentada en el contraste con enfermería?",
+o:[
+"Respuesta humana",
+"Adaptación",
+"Patología y eliminación de la enfermedad",
+"Independencia"
+],
+a:2
+},
+
+{
+q:"En el caso de una persona cuyo entorno dificulta su recuperación, ¿qué lente priorizaría modificaciones de las condiciones ambientales?",
+o:[
+"Henderson",
+"Nightingale",
+"Benner",
+"Watson"
+],
+a:1
+},
+
+{
+q:"¿Cuál es el concepto central asociado a Henderson en la matriz comparativa?",
+o:[
+"Entorno",
+"Ecología",
+"Independencia",
+"Presencia"
+],
+a:2
+},
+
+{
+q:"Para Henderson, la función de enfermería consiste fundamentalmente en:",
+o:[
+"Realizar todos los cuidados por el paciente",
+"Asistir al individuo en actividades que realizaría por sí mismo",
+"Diagnosticar enfermedades",
+"Sustituir al médico"
+],
+a:1
+},
+
+{
+q:"¿Cuáles son los tres elementos cuya ausencia puede requerir asistencia enfermera según Henderson?",
+o:[
+"Salud, entorno y adaptación",
+"Fuerza, conocimiento y voluntad",
+"Diagnóstico, tratamiento y pronóstico",
+"Ciencia, arte y ética"
+],
+a:1
+},
+
+{
+q:"Un paciente puede movilizarse y alimentarse solo, pero la enfermera realiza ambas actividades porque “es más rápido”. Según Henderson, esto puede producir:",
+o:[
+"Independencia acelerada",
+"Dependencia inducida",
+"Mayor autonomía",
+"Mayor conocimiento"
+],
+a:1
+},
+
+{
+q:"¿Cuál es la meta de la ayuda enfermera según Henderson?",
+o:[
+"Mantener al paciente dependiente",
+"Aumentar progresivamente la independencia",
+"Sustituir permanentemente al paciente",
+"Evitar toda participación del paciente"
+],
+a:1
+},
+
+{
+q:"En la dinámica de autonomía, el rol de “sustituta” corresponde principalmente a una situación en que:",
+o:[
+"El paciente planifica junto a la enfermera",
+"La enfermera hace todo por el paciente",
+"Ambos realizan exactamente la mitad",
+"El paciente educa a la enfermera"
+],
+a:1
+},
+
+{
+q:"El rol de “compañera” se caracteriza por:",
+o:[
+"Planificar juntos",
+"Hacer todo por el paciente",
+"Evitar la educación",
+"Impedir la participación"
+],
+a:0
+},
+
+{
+q:"Las 14 necesidades de Henderson son presentadas como:",
+o:[
+"Un listado que reemplaza el juicio clínico",
+"Dimensiones de un sujeto holístico",
+"Diagnósticos médicos",
+"Indicadores empíricos"
+],
+a:1
+},
+
+{
+q:"¿Cuál de las siguientes relaciones corresponde al patrón empírico?",
+o:[
+"Representar–interpretar–imaginar",
+"Experimentar–ubicar–darse cuenta",
+"Describir–explicar–predecir",
+"Clarificar–valorizar–defender"
+],
+a:2
+},
+
+{
+q:"El patrón empírico se caracteriza por ser:",
+o:[
+"Fáctico, descriptivo y públicamente verificable",
+"Exclusivamente subjetivo",
+"Principalmente moral",
+"Basado únicamente en intuición"
+],
+a:0
+},
+
+{
+q:"Una enfermera utiliza evidencia para explicar y posteriormente predecir un fenómeno clínico. ¿Qué patrón está utilizando?",
+o:[
+"Estético",
+"Empírico",
+"Personal",
+"Ético"
+],
+a:1
+},
+
+{
+q:"El patrón estético corresponde principalmente a:",
+o:[
+"La ciencia de la enfermería",
+"El arte de la enfermería",
+"La legislación sanitaria",
+"La medición clínica"
+],
+a:1
+},
+
+{
+q:"¿Cuál secuencia corresponde al patrón estético?",
+o:[
+"Describir–explicar–predecir",
+"Representar–interpretar–imaginar",
+"Clarificar–valorizar–defender",
+"Experimentar–ubicar–darse cuenta"
+],
+a:1
+},
+
+{
+q:"La capacidad de participar en la experiencia de otra persona mediante la empatía corresponde al patrón:",
+o:[
+"Empírico",
+"Ético",
+"Estético",
+"Emancipatorio"
+],
+a:2
+},
+
+{
+q:"El patrón personal exige especialmente:",
+o:[
+"Autoconocimiento de la enfermera",
+"Dominio de estadísticas",
+"Cumplimiento automático de protocolos",
+"Diagnóstico médico"
+],
+a:0
+},
+
+{
+q:"¿Qué secuencia pertenece al patrón personal?",
+o:[
+"Experimentar–ubicar–darse cuenta",
+"Representar–interpretar–imaginar",
+"Describir–explicar–predecir",
+"Clarificar–valorizar–defender"
+],
+a:0
+},
+
+{
+q:"Una enfermera reflexiona sobre su propia participación en el encuentro con el paciente. Esto se relaciona principalmente con el patrón:",
+o:[
+"Personal",
+"Empírico",
+"Ético",
+"Emancipatorio"
+],
+a:0
+},
+
+{
+q:"El patrón ético se centra principalmente en:",
+o:[
+"Medición objetiva",
+"Juicio moral",
+"Imaginación",
+"Progresión profesional"
+],
+a:1
+},
+
+{
+q:"¿Cuál secuencia corresponde al patrón ético?",
+o:[
+"Experimentar–ubicar–darse cuenta",
+"Representar–interpretar–imaginar",
+"Clarificar–valorizar–defender",
+"Describir–explicar–predecir"
+],
+a:2
+},
+
+{
+q:"¿Cuál afirmación refleja el patrón ético?",
+o:[
+"Una acción técnicamente correcta siempre constituye buen cuidado",
+"Las normas fisiológicas eliminan la necesidad de juicio moral",
+"Una acción científicamente correcta puede constituir un mal cuidado",
+"La ética solo depende del diagnóstico"
+],
+a:2
+},
+
+{
+q:"El patrón emancipatorio fue desarrollado posteriormente a:",
+o:[
+"Los cinco niveles de Benner",
+"Los cuatro patrones originales de Carper",
+"La teoría de Henderson",
+"La teoría de Nightingale"
+],
+a:1
+},
+
+{
+q:"El patrón emancipatorio incorpora especialmente:",
+o:[
+"Contexto sociopolítico e inequidades",
+"Solo parámetros fisiológicos",
+"Únicamente autoconocimiento",
+"Solo habilidades psicomotoras"
+],
+a:0
+},
+
+{
+q:"¿Cuál concepto es central en el patrón emancipatorio?",
+o:[
+"Transformación social y equidad en salud",
+"Diagnóstico diferencial",
+"Curación física",
+"Sustitución del paciente"
+],
+a:0
+},
+
+{
+q:"Watson plantea que la calidad del cuidado:",
+o:[
+"Se determina solo por la ejecución correcta del procedimiento",
+"También depende de cómo se trata a la persona durante la intervención",
+"No requiere relación humana",
+"Depende exclusivamente de los signos vitales"
+],
+a:1
+},
+
+{
+q:"Estar físicamente junto al paciente no equivale necesariamente a:",
+o:[
+"Evaluarlo",
+"Estar presente",
+"Registrarlo",
+"Diagnosticarlo"
+],
+a:1
+},
+
+{
+q:"El cuidado transpersonal implica principalmente:",
+o:[
+"Una interacción breve sin intención",
+"Atención genuina, sensibilidad e intencionalidad",
+"Distanciamiento emocional absoluto",
+"Sustitución de la persona"
+],
+a:1
+},
+
+{
+q:"La dignidad de la persona, según el material de Watson, es:",
+o:[
+"Dependiente de su funcionalidad",
+"Dependiente de su diagnóstico",
+"Incondicional",
+"Dependiente de su productividad"
+],
+a:2
+},
+
+{
+q:"¿Cuál elemento NO determina la dignidad de la persona en el material?",
+o:[
+"Estado de enfermedad",
+"Capacidad cognitiva",
+"Productividad",
+"Ninguno de los anteriores"
+],
+a:3
+},
+
+{
+q:"En el proceso de presencia clínica, ¿qué aparece como primer nivel?",
+o:[
+"Cuidar",
+"Comprender",
+"Ver",
+"Reconocer"
+],
+a:2
+},
+
+{
+q:"¿Qué etapa de Benner se encuentra inmediatamente después de “principiante avanzado”?",
+o:[
+"Experto",
+"Eficiente",
+"Competente",
+"Novato"
+],
+a:2
+},
+
+{
+q:"¿Qué aumenta con la experiencia según Benner?",
+o:[
+"La capacidad de detectar situaciones clínicas relevantes",
+"La dependencia de protocolos exclusivamente",
+"La necesidad de sustitución",
+"La distancia con el paciente"
+],
+a:0
+},
+
+{
+q:"En Fawcett, ¿cuál corresponde al máximo nivel de abstracción?",
+o:[
+"Indicadores empíricos",
+"Teorías de mediano rango",
+"Metaparadigma",
+"Modelos conceptuales"
+],
+a:2
+}
+
+],
+
+B: [
+
+{
+q:"¿Qué distingue una disciplina de una práctica organizada?",
+o:[
+"La existencia de un cuerpo propio de conocimientos",
+"La repetición de tareas",
+"La delegación",
+"La tradición"
+],
+a:0
+},
+
+{
+q:"“Siempre se ha hecho así” representa:",
+o:[
+"Pensamiento crítico",
+"La trampa de la tradición",
+"Autonomía profesional",
+"Conocimiento empírico"
+],
+a:1
+},
+
+{
+q:"Riesgo de práctica sin bases teóricas:",
+o:[
+"Mayor autonomía",
+"Ejecución de ritos sin relación con necesidades de cuidado",
+"Mayor capacidad científica",
+"Mejor individualización"
+],
+a:1
+},
+
+{
+q:"Función de teoría como lente:",
+o:[
+"Reemplazar juicio clínico",
+"Decidir qué mirar, comprender porqué y fundamentar acción",
+"Memorizar procedimientos",
+"Eliminar experiencia"
+],
+a:1
+},
+
+{
+q:"Situación Nightingale:",
+o:[
+"Modificar ventilación y ruido para favorecer recuperación",
+"Diagnóstico médico",
+"Evaluar cognición exclusivamente",
+"Clasificar nivel profesional"
+],
+a:0
+},
+
+{
+q:"Disminuir estímulos sonoros:",
+o:[
+"Fuerza",
+"Ruido",
+"Voluntad",
+"Conocimiento"
+],
+a:1
+},
+
+{
+q:"Iluminación ambiental recomendada:",
+o:[
+"Luz solar directa",
+"Oscuridad permanente",
+"Luz artificial exclusivamente",
+"Ausencia de ventanas"
+],
+a:0
+},
+
+{
+q:"Agua identificada:",
+o:[
+"Agua medicada",
+"Agua limpia",
+"Agua destilada exclusivamente",
+"Agua carbonatada"
+],
+a:1
+},
+
+{
+q:"Manejo ambiental pretende conservar:",
+o:[
+"Dependencia",
+"Energía vital",
+"Productividad",
+"Diagnóstico"
+],
+a:1
+},
+
+{
+q:"Mortalidad de Crimea mostrada:",
+o:[
+"2% a 42%",
+"42% a 2%",
+"20% a 10%",
+"50% a 5%"
+],
+a:1
+},
+
+{
+q:"Contraste curar/cuidar:",
+o:[
+"Solo eliminación enfermedad",
+"Respuesta humana, entorno y adaptación",
+"Diagnóstico médico",
+"Tratamiento farmacológico"
+],
+a:1
+},
+
+{
+q:"Concepto potente Nightingale:",
+o:[
+"Autonomía",
+"Entorno/ecología",
+"Presencia",
+"Competencia"
+],
+a:1
+},
+
+{
+q:"Henderson gira hacia:",
+o:[
+"Hábitat exclusivamente",
+"Sujeto y autonomía",
+"Estadística",
+"Diagnóstico médico"
+],
+a:1
+},
+
+{
+q:"Falta de conocimiento:",
+o:[
+"Debilidad muscular",
+"No saber utilizar correctamente dispositivo",
+"Ausencia luz solar",
+"Ruido excesivo"
+],
+a:1
+},
+
+{
+q:"Falta de fuerza:",
+o:[
+"No sabe usar inhalador",
+"Debilidad que limita actividad",
+"Rechaza intervención",
+"Desconoce diagnóstico"
+],
+a:1
+},
+
+{
+q:"Falta de voluntad:",
+o:[
+"Debilidad muscular",
+"Desconocimiento procedimiento",
+"Falta de motivación",
+"Ausencia ventilación"
+],
+a:2
+},
+
+{
+q:"Necesita apoyo físico por debilidad, conserva conocimiento y voluntad:",
+o:[
+"Sustituta total",
+"Ayudante",
+"Observadora pasiva",
+"Médica"
+],
+a:1
+},
+
+{
+q:"Recupera movilidad y participa activamente en planificación:",
+o:[
+"Sustituta",
+"Compañera",
+"Delegada",
+"Diagnóstica"
+],
+a:1
+},
+
+{
+q:"Propósito de ayudar “lo más rápido posible”:",
+o:[
+"Mantener asistencia",
+"Lograr independencia",
+"Aumentar procedimientos",
+"Evitar participación"
+],
+a:1
+},
+
+{
+q:"14 necesidades:",
+o:[
+"Cuestionario rígido",
+"Dimensiones de sujeto holístico",
+"Diagnósticos médicos",
+"Indicadores empíricos"
+],
+a:1
+},
+
+{
+q:"Adapta cuidado a experiencia particular:",
+o:[
+"Estético",
+"Empírico",
+"Ético",
+"Emancipatorio"
+],
+a:0
+},
+
+{
+q:"Resultados observables/verificables:",
+o:[
+"Personal",
+"Estético",
+"Empírico",
+"Ético"
+],
+a:2
+},
+
+{
+q:"Producto patrón empírico:",
+o:[
+"Predecir",
+"Defender",
+"Imaginar",
+"Darse cuenta"
+],
+a:0
+},
+
+{
+q:"Producto patrón estético:",
+o:[
+"Predecir",
+"Imaginar",
+"Defender",
+"Darse cuenta"
+],
+a:1
+},
+
+{
+q:"Producto patrón personal:",
+o:[
+"Explicar",
+"Interpretar",
+"Darse cuenta",
+"Defender"
+],
+a:2
+},
+
+{
+q:"Producto patrón ético:",
+o:[
+"Defender",
+"Imaginar",
+"Predecir",
+"Ubicar"
+],
+a:0
+},
+
+{
+q:"Examina propios prejuicios:",
+o:[
+"Personal",
+"Empírico",
+"Estético",
+"Emancipatorio"
+],
+a:0
+},
+
+{
+q:"Evalúa valores/dignidad:",
+o:[
+"Personal",
+"Ético",
+"Empírico",
+"Estético"
+],
+a:1
+},
+
+{
+q:"Inequidad institucional:",
+o:[
+"Emancipatorio",
+"Estético",
+"Personal",
+"Empírico"
+],
+a:0
+},
+
+{
+q:"Patrón emancipatorio busca:",
+o:[
+"Dependencia",
+"Empoderar persona y profesión enfermera",
+"Eliminar juicio clínico",
+"Reemplazar ética"
+],
+a:1
+},
+
+{
+q:"Ningún patrón aislado:",
+o:[
+"Solo ciencia permite cuidar",
+"Integra diferentes formas de conocer",
+"Ética reemplaza experiencia",
+"Estética reemplaza evidencia"
+],
+a:1
+},
+
+{
+q:"Mismo diagnóstico:",
+o:[
+"Igual experiencia",
+"Puede experimentarse diferente",
+"Debe recibir idéntico cuidado",
+"No subjetividad"
+],
+a:1
+},
+
+{
+q:"Qué transforma objeto de intervención en sujeto:",
+o:[
+"Procedimiento técnico",
+"Presencia",
+"Tecnología",
+"Diagnóstico"
+],
+a:1
+},
+
+{
+q:"Administra medicamentos 10 min y registra sin encuentro:",
+o:[
+"Cuidado transpersonal",
+"Contacto funcional",
+"Presencia clínica",
+"Relación auténtica"
+],
+a:1
+},
+
+{
+q:"Interacción breve con atención genuina:",
+o:[
+"Contacto funcional",
+"Cuidado transpersonal",
+"Sustitución",
+"Dependencia"
+],
+a:1
+},
+
+{
+q:"Procesos Caritas:",
+o:[
+"Relación de ayuda y confianza",
+"Eliminación subjetividad",
+"Diagnóstico médico",
+"Sustitución permanente"
+],
+a:0
+},
+
+{
+q:"Arquitectura presencia: después de “ver”:",
+o:[
+"Escuchar",
+"Diagnosticar",
+"Sustituir",
+"Predecir"
+],
+a:0
+},
+
+{
+q:"Primer nivel Benner:",
+o:[
+"Competente",
+"Principiante",
+"Experto",
+"Eficiente"
+],
+a:1
+},
+
+{
+q:"Dreyfus/Benner describe:",
+o:[
+"Niveles progresivos adquisición habilidades",
+"Diagnósticos médicos",
+"14 necesidades",
+"Patrones Carper"
+],
+a:0
+},
+
+{
+q:"Fawcett nivel más concreto:",
+o:[
+"Filosofías",
+"Metaparadigma",
+"Indicadores empíricos",
+"Grandes teorías"
+],
+a:2
+}
+
+],
+
+C: [
+
+{
+q:"Secuencia desarrollo cuidado humano→disciplina:",
+o:[
+"Disciplina→profesión→cuidado→práctica",
+"Cuidado humano→práctica organizada→profesión→disciplina",
+"Profesión→cuidado→disciplina→práctica",
+"Práctica→cuidado→profesión→disciplina"
+],
+a:1
+},
+
+{
+q:"Profesión:",
+o:[
+"Instinto supervivencia",
+"Práctica social especializada",
+"Cuerpo abstracto teorías",
+"Indicador empírico"
+],
+a:1
+},
+
+{
+q:"Disciplina:",
+o:[
+"Cuerpo propio de conocimientos que fundamenta cuidado",
+"Delegación tareas",
+"Tradición institucional",
+"Eliminación juicio"
+],
+a:0
+},
+
+{
+q:"Problema tradición/delegación:",
+o:[
+"Aumenta autonomía",
+"Deshumaniza cuidado y puede anular autonomía",
+"Aumenta pensamiento crítico",
+"Mejora individualización"
+],
+a:1
+},
+
+{
+q:"Teoría como lente:",
+o:[
+"Receta rígida",
+"Ayuda a decidir qué mirar y fundamentar acción",
+"Elimina razonamiento",
+"Sustituye experiencia"
+],
+a:1
+},
+
+{
+q:"Ruido/energía:",
+o:[
+"Nightingale",
+"Henderson",
+"Benner",
+"Watson"
+],
+a:0
+},
+
+{
+q:"Entorno como prescripción:",
+o:[
+"Mantener ruido",
+"Favorecer aire puro sin enfriar",
+"Alimentar siempre",
+"Evitar iluminación"
+],
+a:1
+},
+
+{
+q:"Higiene en Nightingale:",
+o:[
+"Elemento ambiental",
+"Indicador Benner",
+"Patrón personal",
+"Proceso Caritas"
+],
+a:0
+},
+
+{
+q:"Prioridad Nightingale:",
+o:[
+"Ventana cerrada, ausencia luz, ruido",
+"Educación inhalador",
+"Dilema moral",
+"Enfermera sin experiencia"
+],
+a:0
+},
+
+{
+q:"Caso neumonía, ventana cerrada:",
+o:[
+"Falta voluntad",
+"Aire viciado",
+"Falta conocimiento",
+"Dependencia inducida"
+],
+a:1
+},
+
+{
+q:"Cortinas corridas:",
+o:[
+"Ausencia luz solar",
+"Falta fuerza",
+"Falta conocimiento",
+"Falta voluntad"
+],
+a:0
+},
+
+{
+q:"Henderson:",
+o:[
+"Condiciones ambientales exclusivamente",
+"Capacidad persona satisfacer necesidades",
+"Estadística",
+"Organización"
+],
+a:1
+},
+
+{
+q:"Enseña inhalador:",
+o:[
+"Fuerza",
+"Conocimiento",
+"Entorno",
+"Productividad"
+],
+a:1
+},
+
+{
+q:"Deja paciente hacer actividad aunque tome más:",
+o:[
+"Dependencia",
+"Independencia",
+"Sustitución",
+"Pasividad"
+],
+a:1
+},
+
+{
+q:"Cambio hacia compañero:",
+o:[
+"Enfermera hace todo",
+"Paciente participa planificación",
+"Elimina educación",
+"Paciente deja decidir"
+],
+a:1
+},
+
+{
+q:"NO es uno de tres déficits Henderson:",
+o:[
+"Fuerza",
+"Conocimiento",
+"Voluntad",
+"Iluminación"
+],
+a:3
+},
+
+{
+q:"Evidencia verificable para explicar/predicir:",
+o:[
+"Empírico",
+"Personal",
+"Estético",
+"Ético"
+],
+a:0
+},
+
+{
+q:"Empírico:",
+o:[
+"Subjetividad",
+"Verificabilidad pública",
+"Juicio moral",
+"Transformación sociopolítica"
+],
+a:1
+},
+
+{
+q:"Interpreta expresión corporal singular y adapta creativamente:",
+o:[
+"Estético",
+"Empírico",
+"Ético",
+"Emancipatorio"
+],
+a:0
+},
+
+{
+q:"Estético:",
+o:[
+"Ciencia",
+"Arte del cuidado",
+"Moral",
+"Contexto sociopolítico"
+],
+a:1
+},
+
+{
+q:"Reconoce propias experiencias en relación:",
+o:[
+"Personal",
+"Empírico",
+"Ético",
+"Emancipatorio"
+],
+a:0
+},
+
+{
+q:"Patrón personal:",
+o:[
+"Clarificar-valorizar-defender",
+"Experimentar-ubicar-darse cuenta",
+"Representar-interpretar-imaginar",
+"Describir-explicar-predecir"
+],
+a:1
+},
+
+{
+q:"Decide qué debe hacerse ante conflicto de valores:",
+o:[
+"Estético",
+"Ético",
+"Empírico",
+"Personal"
+],
+a:1
+},
+
+{
+q:"Juicio moral:",
+o:[
+"Obligaciones y defensa dignidad",
+"Predicción estadística",
+"Imaginación artística",
+"Experiencia psicomotora"
+],
+a:0
+},
+
+{
+q:"Política genera desigualdad:",
+o:[
+"Personal",
+"Emancipatorio",
+"Estético",
+"Empírico"
+],
+a:1
+},
+
+{
+q:"Emancipatorio considera:",
+o:[
+"Solo fisiología",
+"Hechos sociopolíticos como género, tecnología y economía",
+"Solo experiencias personales",
+"Solo procedimientos"
+],
+a:1
+},
+
+{
+q:"Acción sociopolítica:",
+o:[
+"Ignorar contexto",
+"Identificar inequidades institucionales/sociales",
+"Mismo cuidado",
+"Evitar empoderar"
+],
+a:1
+},
+
+{
+q:"Watson dignidad:",
+o:[
+"Productividad",
+"Reconocer persona más allá categorías clínicas",
+"Enfermedad define",
+"Funcionalidad determina valor"
+],
+a:1
+},
+
+{
+q:"Contradice dignidad:",
+o:[
+"Historia personal",
+"Reducir persona a diagnóstico",
+"Escuchar",
+"Experiencia"
+],
+a:1
+},
+
+{
+q:"Físicamente junto pero concentrada en registros:",
+o:[
+"Física=terapéutica",
+"Proximidad física no garantiza presencia",
+"Registrar suficiente",
+"Presencia elimina competencia"
+],
+a:1
+},
+
+{
+q:"Cuidado transpersonal:",
+o:[
+"Interacción intencional/atención genuina",
+"Distancia",
+"Sustitución sujeto",
+"Automatización"
+],
+a:0
+},
+
+{
+q:"Caritas:",
+o:[
+"Ambientes de dignidad",
+"Diagnóstico diferencial",
+"Tratamiento farmacológico",
+"Productividad"
+],
+a:0
+},
+
+{
+q:"Presencia clínica comienza:",
+o:[
+"Cuidar",
+"Comprender",
+"Ver",
+"Reconocer"
+],
+a:2
+},
+
+{
+q:"Reconocer:",
+o:[
+"Validar historia del otro",
+"Diagnóstico médico",
+"Sustituir",
+"Medir indicadores"
+],
+a:0
+},
+
+{
+q:"Benner habilidad:",
+o:[
+"Experiencia",
+"Ausencia práctica",
+"Repetición mecánica exclusivamente",
+"Edad"
+],
+a:0
+},
+
+{
+q:"Orden Benner:",
+o:[
+"Principiante, competente, principiante avanzado, experto, eficiente",
+"Principiante, principiante avanzado, competente, eficiente, experto",
+"Experto, eficiente, competente, principiante avanzado, principiante",
+"Principiante avanzado, principiante, eficiente, competente, experto"
+],
+a:1
+},
+
+{
+q:"Desarrollo Benner:",
+o:[
+"Formas cualitativamente distintas de práctica",
+"Una sola forma",
+"Elimina experiencia",
+"Sustituye teoría por tradición"
+],
+a:0
+},
+
+{
+q:"Competencia principiante avanzada UCI:",
+o:[
+"Dominio clínico intuitivo",
+"Eliminación juicio",
+"Dependencia total protocolo",
+"Ausencia visión general"
+],
+a:0
+},
+
+{
+q:"Fawcett concepts globales:",
+o:[
+"Metaparadigma",
+"Indicadores",
+"Middle range",
+"Filosofías"
+],
+a:0
+},
+
+{
+q:"Metaparadigma:",
+o:[
+"Paciente, médico, hospital, familia",
+"Persona, entorno, salud, enfermería",
+"Fuerza, conocimiento, voluntad, autonomía",
+"Ciencia, arte, ética, experiencia"
+],
+a:1
+}
+
+]
+
+};
+
+
+/* =========================================================
+   ESTADO DE LA APLICACIÓN
+   ========================================================= */
+
+let currentExam = "A";
+
+let currentQuestion = 0;
+
+let answers = [];
+
+let finished = false;
+
+let correctionMode = "final";
+
+
+/* =========================================================
+   ELEMENTOS HTML
+   ========================================================= */
+
+const quizContainer =
+    document.getElementById("quizContainer");
+
+const progressBar =
+    document.getElementById("progressBar");
+
+const progressText =
+    document.getElementById("progressText");
+
+const answeredText =
+    document.getElementById("answeredText");
+
+const correctionSelect =
+    document.getElementById("correctionMode");
+
+const restartButton =
+    document.getElementById("restartButton");
+
+const examTabs =
+    document.querySelectorAll(".exam-tab");
+
+
+/* =========================================================
+   INICIALIZAR EXAMEN
+   ========================================================= */
+
+function initializeExam(exam) {
+
+    currentExam = exam;
+
+    currentQuestion = 0;
+
+    finished = false;
+
+    answers =
+        new Array(EXAMS[currentExam].length).fill(null);
+
+    updateTabs();
+
+    renderQuestion();
+
+}
+
+
+/* =========================================================
+   ACTUALIZAR PESTAÑAS
+   ========================================================= */
+
+function updateTabs() {
+
+    examTabs.forEach(tab => {
+
+        tab.classList.toggle(
+            "active",
+            tab.dataset.exam === currentExam
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   RENDERIZAR PREGUNTA
+   ========================================================= */
+
+function renderQuestion() {
+
+    const questions = EXAMS[currentExam];
+
+    const question = questions[currentQuestion];
+
+    const selected = answers[currentQuestion];
+
+    const total = questions.length;
+
+    const answered =
+        answers.filter(answer => answer !== null).length;
+
+
+    progressText.textContent =
+        `Pregunta ${currentQuestion + 1} de ${total}`;
+
+    answeredText.textContent =
+        `Respondidas: ${answered}/${total}`;
+
+    progressBar.style.width =
+        `${((currentQuestion + 1) / total) * 100}%`;
+
+
+    quizContainer.innerHTML = "";
+
+
+    const number =
+        document.createElement("div");
+
+    number.className = "question-number";
+
+    number.textContent =
+        `${currentExam === "A"
+            ? "Examen A"
+            : currentExam === "B"
+                ? "Examen B"
+                : "Examen C"
+        } · Pregunta ${currentQuestion + 1}`;
+
+
+    const questionTitle =
+        document.createElement("h2");
+
+    questionTitle.className = "question";
+
+    questionTitle.textContent =
+        question.q;
+
+
+    const options =
+        document.createElement("div");
+
+    options.className = "options";
+
+
+    question.o.forEach((optionText, index) => {
+
+        const label =
+            document.createElement("label");
+
+        label.className =
+            "option" +
+            (selected === index
+                ? " selected"
+                : "");
+
+
+        const radio =
+            document.createElement("input");
+
+        radio.type = "radio";
+
+        radio.name = "answer";
+
+        radio.value = index;
+
+        radio.checked =
+            selected === index;
+
+
+        radio.addEventListener(
+            "change",
+            () => selectAnswer(index)
+        );
+
+
+        const letter =
+            document.createElement("span");
+
+        letter.className =
+            "option-letter";
+
+        letter.textContent =
+            ["a)", "b)", "c)", "d)"][index];
+
+
+        const text =
+            document.createElement("span");
+
+        text.textContent =
+            optionText;
+
+
+        label.appendChild(radio);
+
+        label.appendChild(letter);
+
+        label.appendChild(text);
+
+        options.appendChild(label);
+
+    });
+
+
+    quizContainer.appendChild(number);
+
+    quizContainer.appendChild(questionTitle);
+
+    quizContainer.appendChild(options);
+
+
+    /* FEEDBACK INMEDIATO */
+
+    if (
+        correctionMode === "instant" &&
+        selected !== null
+    ) {
+
+        const feedback =
+            document.createElement("div");
+
+        if (selected === question.a) {
+
+            feedback.className =
+                "feedback correct";
+
+            feedback.textContent =
+                "✓ Correcta";
+
+        } else {
+
+            feedback.className =
+                "feedback wrong";
+
+            feedback.textContent =
+                "✗ Incorrecta. La respuesta correcta es " +
+                ["a", "b", "c", "d"][question.a] +
+                ") " +
+                question.o[question.a];
+
+        }
+
+        quizContainer.appendChild(feedback);
+
+    }
+
+
+    /* NAVEGACIÓN */
+
+    const navigation =
+        document.createElement("div");
+
+    navigation.className =
+        "navigation";
+
+
+    const previous =
+        document.createElement("button");
+
+    previous.className =
+        "button";
+
+    previous.textContent =
+        "← Anterior";
+
+    previous.disabled =
+        currentQuestion === 0;
+
+
+    previous.addEventListener(
+        "click",
+        () => {
+
+            if (currentQuestion > 0) {
+
+                currentQuestion--;
+
+                renderQuestion();
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+            }
+
+        }
+    );
+
+
+    const rightButtons =
+        document.createElement("div");
+
+    rightButtons.className =
+        "navigation-right";
+
+
+    const next =
+        document.createElement("button");
+
+    next.className =
+        "button primary";
+
+
+    if (currentQuestion === total - 1) {
+
+        next.textContent =
+            "Finalizar examen";
+
+    } else {
+
+        next.textContent =
+            "Siguiente →";
+
+    }
+
+
+    next.addEventListener(
+        "click",
+        () => {
+
+            if (currentQuestion === total - 1) {
+
+                finishExam();
+
+            } else {
+
+                currentQuestion++;
+
+                renderQuestion();
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+            }
+
+        }
+    );
+
+
+    rightButtons.appendChild(next);
+
+    navigation.appendChild(previous);
+
+    navigation.appendChild(rightButtons);
+
+    quizContainer.appendChild(navigation);
+
+}
+
+
+/* =========================================================
+   SELECCIONAR RESPUESTA
+   ========================================================= */
+
+function selectAnswer(index) {
+
+    answers[currentQuestion] = index;
+
+    renderQuestion();
+
+}
+
+
+/* =========================================================
+   FINALIZAR EXAMEN
+   ========================================================= */
+
+function finishExam() {
+
+    finished = true;
+
+    renderResults();
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =========================================================
+   RESULTADOS
+   ========================================================= */
+
+function renderResults() {
+
+    const questions =
+        EXAMS[currentExam];
+
+    let score = 0;
+
+
+    questions.forEach((question, index) => {
+
+        if (
+            answers[index] === question.a
+        ) {
+
+            score++;
+
+        }
+
+    });
+
+
+    const total =
+        questions.length;
+
+    const percentage =
+        Math.round((score / total) * 100);
+
+
+    progressText.textContent =
+        "Examen terminado";
+
+    answeredText.textContent =
+        `Respondidas: ${answers.filter(x => x !== null).length}/${total}`;
+
+    progressBar.style.width =
+        "100%";
+
+
+    quizContainer.innerHTML = "";
+
+
+    const result =
+        document.createElement("div");
+
+    result.className =
+        "result";
+
+
+    const title =
+        document.createElement("h2");
+
+    title.className =
+        "result-title";
+
+    title.textContent =
+        `Resultado — Examen ${currentExam}`;
+
+
+    const scoreElement =
+        document.createElement("div");
+
+    scoreElement.className =
+        "score";
+
+    scoreElement.textContent =
+        `${score}/${total}`;
+
+
+    const percentageElement =
+        document.createElement("div");
+
+    percentageElement.className =
+        "percentage";
+
+    percentageElement.textContent =
+        `${percentage}%`;
+
+
+    const description =
+        document.createElement("p");
+
+    description.textContent =
+        "Revisa pregunta por pregunta tus respuestas y la alternativa correcta.";
+
+
+    const actions =
+        document.createElement("div");
+
+    actions.className =
+        "result-actions";
+
+
+    const retry =
+        document.createElement("button");
+
+    retry.className =
+        "button primary";
+
+    retry.textContent =
+        "Reintentar examen";
+
+
+    retry.addEventListener(
+        "click",
+        () => initializeExam(currentExam)
+    );
+
+
+    const another =
+        document.createElement("button");
+
+    another.className =
+        "button";
+
+    another.textContent =
+        "Volver al inicio";
+
+
+    another.addEventListener(
+        "click",
+        () => {
+
+            initializeExam("A");
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+    );
+
+
+    actions.appendChild(another);
+
+    actions.appendChild(retry);
+
+
+    result.appendChild(title);
+
+    result.appendChild(scoreElement);
+
+    result.appendChild(percentageElement);
+
+    result.appendChild(description);
+
+    result.appendChild(actions);
+
+
+    /* =====================================================
+       REVISION
+       ===================================================== */
+
+    const reviewTitle =
+        document.createElement("h3");
+
+    reviewTitle.textContent =
+        "Revisión de respuestas";
+
+
+    result.appendChild(reviewTitle);
+
+
+    const review =
+        document.createElement("div");
+
+    review.className =
+        "review";
+
+
+    questions.forEach(
+        (question, index) => {
+
+            const userAnswer =
+                answers[index];
+
+            const correct =
+                userAnswer === question.a;
+
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "review-item " +
+                (correct
+                    ? "correct"
+                    : "wrong");
+
+
+            const status =
+                document.createElement("span");
+
+            status.className =
+                "review-status " +
+                (correct
+                    ? "correct"
+                    : "wrong");
+
+
+            status.textContent =
+                correct
+                    ? "✓ Correcta"
+                    : "✗ Incorrecta";
+
+
+            const questionText =
+                document.createElement("div");
+
+            questionText.className =
+                "review-question";
+
+            questionText.textContent =
+                `${index + 1}. ${question.q}`;
+
+
+            const yourAnswer =
+                document.createElement("div");
+
+            yourAnswer.className =
+                "answer-line";
+
+
+            if (userAnswer === null) {
+
+                yourAnswer.innerHTML =
+                    "<strong>Tu respuesta:</strong> Sin responder";
+
+            } else {
+
+                yourAnswer.innerHTML =
+                    "<strong>Tu respuesta:</strong> " +
+                    ["a", "b", "c", "d"][userAnswer] +
+                    ") " +
+                    question.o[userAnswer];
+
+            }
+
+
+            const correctAnswer =
+                document.createElement("div");
+
+            correctAnswer.className =
+                "answer-line";
+
+            correctAnswer.innerHTML =
+                "<strong>Respuesta correcta:</strong> " +
+                ["a", "b", "c", "d"][question.a] +
+                ") " +
+                question.o[question.a];
+
+
+            item.appendChild(status);
+
+            item.appendChild(questionText);
+
+            item.appendChild(yourAnswer);
+
+            item.appendChild(correctAnswer);
+
+            review.appendChild(item);
+
+        }
+    );
+
+
+    result.appendChild(review);
+
+    quizContainer.appendChild(result);
+
+}
+
+
+/* =========================================================
+   CAMBIAR EXAMEN
+   ========================================================= */
+
+examTabs.forEach(tab => {
+
+    tab.addEventListener(
+        "click",
+        () => {
+
+            initializeExam(
+                tab.dataset.exam
+            );
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   BOTÓN REINICIAR
+   ========================================================= */
+
+restartButton.addEventListener(
+    "click",
+    () => {
+
+        initializeExam(currentExam);
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+);
+
+
+/* =========================================================
+   MODO DE CORRECCIÓN
+   ========================================================= */
+
+correctionSelect.addEventListener(
+    "change",
+    event => {
+
+        correctionMode =
+            event.target.value;
+
+        if (!finished) {
+
+            renderQuestion();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INICIAR
+   ========================================================= */
+
+initializeExam("A");
+
+</script>
+
+</body>
+</html>

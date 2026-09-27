@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Evaluación - Modelos y Teorías de Enfermería</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --correct: #16a34a;
+            --incorrect: #dc2626;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .exam-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background: white;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover, .btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-submit {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+
+        .question-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option:hover {
+            background-color: #f1f5f9;
+        }
+
+        .option input {
+            margin-top: 4px;
+            margin-right: 12px;
+        }
+
+        .result-panel {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid var(--primary);
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .correct-ans {
+            background-color: #dcfce7;
+            color: var(--correct);
+            border: 1px solid #86efac;
+        }
+
+        .incorrect-ans {
+            background-color: #fee2e2;
+            color: var(--incorrect);
+            border: 1px solid #fca5a5;
+        }
+
+        .key-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .key-item {
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Evaluación de Modelos y Teorías de Enfermería</h1>
+        <p>Preparación Intensiva - 120 Preguntas de Selección Múltiple</p>
+    </header>
+
+    <div class="exam-selector">
+        <button class="btn active" onclick="loadExam('A')">Examen A (40 Preguntas)</button>
+        <button class="btn" onclick="loadExam('B')">Examen B (40 Preguntas)</button>
+        <button class="btn" onclick="loadExam('C')">Examen C (40 Preguntas)</button>
+    </div>
+
+    <div id="resultContainer" class="result-panel">
+        <h2>Resultado del Examen</h2>
+        <div class="score" id="scoreDisplay">0 / 40</div>
+        <p id="percentageDisplay"></p>
+        <h3>Clavijero de Respuestas</h3>
+        <div class="key-grid" id="keyGrid"></div>
+    </div>
+
+    <form id="quizForm">
+        <div id="questionsContainer"></div>
+        <button type="button" class="btn btn-submit" onclick="submitExam()">Entregar y Calificar Examen</button>
+    </form>
+</div>
+
+<script>
+const examsData = {
+    A: [
+        { q: "1. ¿Cuál es el nivel más abstracto de la estructura jerárquica del conocimiento desarrollada por Jacqueline Fawcett?", a: ["Grandes Teorías", "Modelos Conceptuales", "Metaparadigma", "Indicadores Empíricos"], c: 2 },
+        { q: "2. Según Fawcett, un Modelo Conceptual se define como:", a: ["Un conjunto de conceptos abstractos y generales que integran una perspectiva única sobre el metaparadigma.", "Una prueba directa de las hipótesis en la práctica clínica.", "Un conjunto de proposiciones operacionales probadas empíricamente.", "Una guía estricta de procedimiento médico paso a paso."], c: 0 },
+        { q: "3. ¿Qué patrón de conocimiento de Barbara Carper se refiere al componente científico, enfocado en leyes generales y modelos teóricos?", a: ["Patrón Estético", "Patrón Empírico", "Patrón Ético", "Patrón Personal"], c: 1 },
+        { q: "4. El patrón del conocimiento 'Estético' (o el arte de la enfermería) según Carper se manifiesta mediante:", a: ["La memorización de las dosis farmacológicas.", "La percepción intuitiva de la experiencia única del paciente y la respuesta creativa ante ella.", "El cumplimiento del código deontológico.", "La evaluación cuantitativa de los signos vitales."], c: 1 },
+        { q: "5. ¿Qué elemento fue añadido posteriormente a los cuatro patrones de Carper para abordar las inequidades sociales en salud?", a: ["Patrón Emancipatorio / Social", "Patrón Biológico", "Patrón Estadístico", "Patrón Tecnológico"], c: 0 },
+        { q: "6. En el modelo de Patricia Benner (Novato a Experto), la etapa 'Principiante / Novato' se caracteriza por:", a: ["Uso de la intuición para tomar decisiones complejas.", "Comportamiento gobernado por reglas inflexibles e independientes del contexto.", "Capacidad de priorizar activamente según el cuadro clínico general.", "Percepción de la situación como un todo integrado."], c: 1 },
+        { q: "7. Según Benner, la principal diferencia entre el nivel 'Competente' y el nivel 'Eficiente' es que el profesional Eficiente:", a: ["Sigue las reglas al pie de la letra sin flexibilidad.", "Percibe la situación como un todo (holística) en lugar de partes separadas.", "Carece de experiencia previa para anticipar complicaciones.", "Requiere supervisión constante de un tutor."], c: 1 },
+        { q: "8. En la etapa 'Experto' de Benner, la toma de decisiones clínicas se caracteriza por:", a: ["Un razonamiento analítico lento y basado en manuales.", "El uso de guías estrictas de procedimiento.", "Una comprensión intuitiva del cuadro clínico con acción fluida y rápida.", "La incapacidad de justificar el actuar clínico."], c: 2 },
+        { q: "9. ¿Qué concepto de Patricia Benner describe la capacidad de captar los aspectos sutiles y cambiantes de una situación clínica?", a: ["Pensamiento abstracto", "Juicio crítico formal", "Sentido de relevancia / Percepción clínica", "Cumplimiento normativo"], c: 2 },
+        { q: "10. Según Jean Watson, los '10 Procesos Caritas' representan la evolución teórica de:", a: ["Los 10 Requisitos de Autocuidado.", "Los 10 Factores de Cuidado (Carative Factors).", "Los 10 Modos Adaptativos.", "Los 10 Mandamientos de la Bioseguridad."], c: 1 },
+        { q: "11. En la Teoría del Cuidado Humano de Watson, el 'Momento de Cuidado' (Caring Occasion) ocurre cuando:", a: ["Se administra un medicamento endovenoso según horario.", "La enfermera y el paciente conectan a nivel transpersonal marcando la historia de ambos.", "Se firma la alta médica del usuario.", "Se realiza la ficha de ingreso hospitalario."], c: 1 },
+        { q: "12. La relación de Cuidado Transpersonal de Jean Watson busca primordialmente:", a: ["Estandarizar los procedimientos clínicos.", "Proteger, realzar y conservar la dignidad, la humanidad y el espíritu del ser humano.", "Reducir los costos de la atención hospitalaria.", "Controlar los factores biológicos de la enfermedad."], c: 1 },
+        { q: "13. Según la Guía de Liderazgo BPSO/RNAO, el liderazgo clínico en enfermería debe ser ejercido principalmente por:", a: ["Únicamente los directores de los hospitales.", "Todos los enfermeros/as en su práctica diaria (Point-of-Care Leadership).", "Los docentes universitarios exclusivamente.", "Los médicos jefes de servicio."], c: 1 },
+        { q: "14. El liderazgo transformacional promovido por las Guías BPSO/RNAO se enfoca en:", a: ["Sancionar los errores administrativos.", "Inspirar, motivar y apoyar la práctica basada en la evidencia y el cambio organizacional.", "Mantener la rutina del servicio sin modificaciones.", "Delegar la responsabilidad del cuidado en el personal técnico."], c: 1 },
+        { q: "15. ¿Cuál es el postulado central de la Teoría Ambiental de Florence Nightingale?", a: ["El cuidado debe centrarse exclusivamente en la administración de fármacos.", "Un entorno saludable (aire, agua, luz, higiene) permite a la naturaleza sanar al paciente.", "La persona es un sistema puramente cibernético.", "El autocuidado es la base del restablecimiento de la salud."], c: 1 },
+        { q: "16. Según Nightingale, ¿cuál de los siguientes factores del entorno es el más crítico para la recuperación?", a: ["El uso de antisépticos químicos.", "El aire puro y la ventilación adecuada sin enfriar al paciente.", "La música instrumental constante.", "La iluminación artificial intensa."], c: 1 },
+        { q: "17. En la Teoría Bioecológica de Bronfenbrenner, el 'Microsistema' corresponde a:", a: ["El contexto sociocultural e ideológico general.", "El entorno inmediato donde la persona interactúa directamente (familia, hospital).", "Las políticas de salud pública del país.", "Las relaciones entre dos entornos en los que la persona no participa."], c: 1 },
+        { q: "18. En el contexto de Bronfenbrenner, el 'Macrosistema' abarca:", a: ["El hogar del paciente.", "Los valores culturales, leyes, ideologías y creencias de una sociedad.", "La interacción entre la escuela y el hogar.", "El equipo médico tratante."], c: 1 },
+        { q: "19. El enfoque 'One Health' (Una Sola Salud) promueve la colaboración interdisciplinaria en la intersección de:", a: ["Salud humana, salud animal y salud ambiental.", "Salud pública, medicina privada y farmacia.", "Enfermería, medicina y kinesiología.", "Salud mental, salud física y salud espiritual."], c: 0 },
+        { q: "20. Según el Modelo de Sistemas Adaptativos de Callista Roy, el ser humano responde a estímulos clasificados como:", a: ["Focales, Contextuales y Residuales.", "Biológicos, Químicos y Físicos.", "Primarios, Secundarios y Terciarios.", "Internos, Externos y Ambientales."], c: 0 },
+        { q: "21. En el modelo de Roy, un 'Estímulo Focal' se define como:", a: ["El trasfondo general que influye en la situación.", "El factor o cambio inmediato que desencadena la respuesta directa de la persona.", "Creencias pasadas que no son medibles.", "Factores biológicos del desarrollo."], c: 1 },
+        { q: "22. ¿Cuáles son los dos subsistemas de procesamiento según Roy?", a: ["Innato y Adquirido.", "Regulador (fisiológico) y Cognitivo (psicosocial).", "Simpático y Parasimpático.", "Activo y Pasivo."], c: 1 },
+        { q: "23. En el Modelo de Roy, ¿cuáles son los 4 Modos Adaptativos?", a: ["Fisiológico, Autoconcepto, Función de Rol e Interdependencia.", "Físico, Mental, Emocional y Social.", "Básico, Intermedio, Avanzado y Experto.", "Nutrición, Eliminación, Descanso y Actividad."], c: 0 },
+        { q: "24. En la Teoría General del Autocuidado de Dorothea Orem, el concepto de 'Agencia de Autocuidado' refiere a:", a: ["El centro de salud que atiende al paciente.", "La capacidad aprendida de la persona para realizar acciones destinadas a mantener su vida y salud.", "El conjunto de enfermeros que atienden la sala.", "El plan de alta médica."], c: 1 },
+        { q: "25. Según Orem, los Requisitos de Autocuidado Universal corresponden a:", a: ["Las necesidades humanas básicas compartidas por todos (aire, agua, eliminación, equilibrio).", "Los requerimientos derivados de una patología específica.", "Los cambios asociados al envejecimiento únicamente.", "Las órdenes médicas específicas."], c: 0 },
+        { q: "26. Cuando un paciente no puede realizar ninguna acción de autocuidado y la enfermera asume la totalidad de la atención, el Sistema de Enfermería es:", a: ["Apoyo Educativo", "Parcialmente Compensatorio", "Totalmente Compensatorio", "Intermitente"], c: 2 },
+        { q: "27. Si la enfermera entrena a un paciente diabético para que se autoadministre la insulina y monitoree su glucemia, se aplica un Sistema de Enfermería:", a: ["Totalmente Compensatorio", "Parcialmente Compensatorio", "Apoyo Educativo / Apoyo-Educación", "Sustitutivo"], c: 2 },
+        { q: "28. En la jerarquía de Fawcett, los 'Indicadores Empíricos' se relacionan con:", a: ["Filosofías abstractas.", "Instrumentos de medición, escalas y observaciones concretas en la práctica.", "El metaparadigma general.", "Las grandes teorías no comprobables."], c: 1 },
+        { q: "29. Virginia Henderson define la función propia de la enfermería como ayudar al individuo sano o enfermo a realizar actividades que contribuyan a su salud o recuperación, las cuales realizaría sin ayuda si tuviera:", a: ["Mayor nivel socioeconómico.", "La fuerza, voluntad o conocimientos necesarios.", "Un diagnóstico médico certero.", "Acceso a tecnología de punta."], c: 1 },
+        { q: "30. ¿Cuántas necesidades básicas fundamentales identifica Virginia Henderson en su modelo?", a: ["10", "12", "14", "21"], c: 2 },
+        { q: "31. ¿Qué relación establece Benner entre la teoría y la práctica en 'Novato a Experto'?", a: ["La teoría reemplaza completamente a la práctica.", "La experiencia práctica refinada permite trascender la teoría abstracta inicial.", "La práctica sin teoría no tiene valor científico.", "Las reglas teóricas son suficientes en la etapa de experto."], c: 1 },
+        { q: "32. Un 'Factor Caritas' de Jean Watson orientado a la fe y la esperanza busca:", a: ["Promover creencias científicas rígidas.", "Instaurar una presencia que valide la dimensión espiritual y la fe del usuario.", "Sustituir el tratamiento médico por oración.", "Eliminar el dolor físico mediante autosugestión."], c: 1 },
+        { q: "33. Las Guías de Buenas Prácticas de la RNAO se caracterizan por ser:", a: ["Sugerencias opcionales sin fundamento.", "Recomendaciones basadas en evidencia para estandarizar el cuidado y mejorar resultados.", "Reglas inflexibles impuestas por las aseguradoras.", "Manuales exclusivamente administrativos."], c: 1 },
+        { q: "34. Nightingale sostenía que el ruido que más perjudica a un enfermo es aquel que:", a: ["Es constante y de baja intensidad.", "Es repentino, innecesario o produce expectativa e incertidumbre.", "Proviene de la calle fuera del hospital.", "Generan las máquinas de ventilación."], c: 1 },
+        { q: "35. En la teoría de Bronfenbrenner, el 'Exosistema' influye en la persona porque:", a: ["La persona participa de forma directa e interactiva diariamente.", "Incluye entornos en los que la persona no está directamente presente pero que afectan su entorno inmediato.", "Representa la cultura global del planeta.", "Es el marco biológico genético."], c: 1 },
+        { q: "36. La estrategia de 'One Health' cobra especial relevancia crítica en la gestión de:", a: ["Zoonosis, resistencia a los antimicrobianos y cambio climático.", "Trastornos genéticos congénitos.", "Procedimientos quirúrgicos electivos.", "Facturación hospitalaria."], c: 0 },
+        { q: "37. Según Roy, cuando las respuestas de la persona ante un estímulo no promueven sus metas de supervivencia y desarrollo, se consideran:", a: ["Respuestas Integradas", "Respuestas Compensatorias", "Respuestas Ineficaces (o no adaptativas)", "Respuestas Reflejas"], c: 2 },
+        { q: "38. En la teoría de Orem, la 'Deficit de Autocuidado' ocurre cuando:", a: ["La Demanda de Autocuidado Terapéutico supera la Agencia de Autocuidado del individuo.", "La Agencia de Autocuidado es mayor que la Demanda.", "El paciente se niega a recibir atención médica.", "La enfermera no tiene tiempo para atender al usuario."], c: 0 },
+        { q: "39. Un indicador empírico para medir el dolor de un paciente según la jerarquía de Fawcett sería:", a: ["El concepto abstracto de confort.", "La Escala Visual Analógica (EVA) de dolor de 0 a 10.", "El Modelo de Sistemas de Neuman.", "El Metaparadigma de Enfermería."], c: 1 },
+        { q: "40. Para Benner, el 'Principiante Avanzado' es aquel que:", a: ["Demuestra un rendimiento intuitivo y rápido.", "Ha enfrentado suficientes situaciones reales para identificar 'aspectos' o patrones recurrentes.", "Planea su trabajo a largo plazo de forma consciente y deliberada.", "No requiere ningún tipo de guía."], c: 1 }
+    ],
+    B: [
+        { q: "1. ¿Cuál es el orden CORRECTO de la estructura jerárquica del conocimiento de Fawcett, de lo MÁS abstracto a lo MÁS concreto?", a: ["Indicadores Empíricos -> Teorías -> Modelos Conceptuales -> Metaparadigma", "Metaparadigma -> Filosofías -> Modelos Conceptuales -> Grandes Teorías -> Teorías Mediano Rango -> Indicadores Empíricos", "Modelos Conceptuales -> Metaparadigma -> Teorías -> Indicadores Empíricos", "Filosofías -> Metaparadigma -> Indicadores Empíricos -> Teorías"], c: 1 },
+        { q: "2. ¿Qué patrón del conocimiento de Carper se relaciona con la conciencia moral y el 'deber ser' en el cuidado?", a: ["Empírico", "Estético", "Ético", "Personal"], c: 2 },
+        { q: "3. El patrón 'Personal' según Carper implica fundamentalmente:", a: ["Aprenderse el nombre de las patologías.", "El conocimiento, aceptación y uso terapéutico de uno mismo en relación con el otro.", "Rechazar las emociones del paciente para mantener la objetividad.", "El dominio de las guías farmacológicas."], c: 1 },
+        { q: "4. Según Benner, la etapa 'Competente' se alcanza típicamente tras estar en la misma función durante:", a: ["0 a 6 meses", "2 a 3 años", "10 años o más", "1 mes de práctica"], c: 1 },
+        { q: "5. ¿Qué distingue a una persona en la etapa de 'Principiante Avanzado' según Benner?", a: ["Toma decisiones intuitivas instantáneas.", "Comienza a reconocer aspectos globales del cuadro clínico basándose en experiencias previas recientes.", "Tiene total visión estratégica a largo plazo.", "Sigue únicamente reglas de manual sin adaptación."], c: 1 },
+        { q: "6. En la Filosofía de Jean Watson, la 'Presencia Auténtica' requiere que la enfermera:", a: ["Realice el procedimiento técnico lo más rápido posible.", "Esté plenamente disponible física, mental y espiritualmente en el momento del cuidado.", "Mantenga distancia emocional estricta.", "Enfoque su atención sólo en el monitor de signos vitales."], c: 1 },
+        { q: "7. ¿Qué busca promover la implantación de Guías de Buenas Prácticas (BPSO/RNAO) en las instituciones de salud?", a: ["Aumentar la burocracia administrativa.", "Transformar la práctica clínica reduciendo la variabilidad injustificada y basándose en evidencia.", "Eliminar la autonomía de las enfermeras.", "Reemplazar los modelos de enfermería por protocolos médicos."], c: 1 },
+        { q: "8. Nightingale consideraba la luz solar directa en la habitación del enfermo como esencial para:", a: ["Aumentar la temperatura de la sala excesivamente.", "El proceso de purificación, desinfección y bienestar psíquico del paciente.", "Evitar que el paciente se duerma en el día.", "Mejorar la visión del personal médico únicamente."], c: 1 },
+        { q: "9. En la Teoría Bioecológica, la relación activa entre la familia del paciente y el equipo de salud hospitalario constituye un:", a: ["Microsistema", "Mesosistema", "Macrosistema", "Cronosistema"], c: 1 },
+        { q: "10. El factor 'Cronosistema' en el modelo de Bronfenbrenner incorpora la dimensión del:", a: ["Espacio físico.", "Tiempo y momento histórico en que ocurren los eventos de vida.", "Nivel socioeconómico.", "Clima geográfico."], c: 1 },
+        { q: "11. Un principio clave del enfoque 'One Health' es que las enfermedades zoonóticas:", a: ["Solo afectan a los animales domésticos.", "Representan una amenaza compartida que requiere la coordinación entre veterinarios, médicos y epidemiólogos.", "No tienen relación con el medio ambiente.", "Deben ser tratadas exclusivamente con antibióticos sintéticos."], c: 1 },
+        { q: "12. Según Roy, un 'Estímulo Contextual' corresponde a:", a: ["El factor desencadenante central e inmediato.", "Todos los demás estímulos presentes en la situación que contribuyen al efecto del estímulo focal.", "Creencias o factores culturales no medibles en el momento.", "Un reflejo neurológico involuntario."], c: 1 },
+        { q: "13. Cuando la persona según Roy utiliza procesos de pensamiento, aprendizaje y juicio para adaptarse, está utilizando el subsistema:", a: ["Regulador", "Cognitivo", "Focal", "Innato"], c: 1 },
+        { q: "14. Los Requisitos de Autocuidado del 'Desarrollo' en el modelo de Orem se refieren a:", a: ["Las necesidades universales de hidratación y oxígeno.", "Condiciones asociadas a las etapas del ciclo vital y eventos de la vida (p. ej., embarazo, envejecimiento).", "Recuperación de una cirugía cardiaca.", "Instrucciones de la receta médica."], c: 1 },
+        { q: "15. En el Modelo de Orem, cuando el paciente y la enfermera comparten la responsabilidad de las acciones de cuidado (p. ej., postoperado que aprende a curar su herida), el sistema es:", a: ["Totalmente Compensatorio", "Parcialmente Compensatorio", "Apoyo Educativo", "Sustitutivo Total"], c: 1 },
+        { q: "16. En la propuesta de Henderson, la independencia en la satisfacción de las 14 necesidades fundamentales es la meta para alcanzar:", a: ["La curación biológica definitiva.", "La autonomía y la salud del individuo.", "La dependencia permanente del sistema de salud.", "El cumplimiento del plan de auditoría."], c: 1 },
+        { q: "17. Según Benner, la persona 'Eficiente' (Proficient) se diferencia de la 'Competente' porque la Eficiente:", a: ["Requiere listas de chequeo para todo.", "Ve la situación globalmente de manera intuitiva y reconoce cuando el cuadro clínico se desvía de lo normal.", "Sigue las reglas fijas sin importar el contexto.", "Aplica algoritmos sin cuestionar."], c: 1 },
+        { q: "18. Los Procesos 'Caritas' de Jean Watson enfatizan la necesidad de cultivar:", a: ["Una práctica espiritual personal y el autocuidado de la propia enfermera.", "El distanciamiento afectivo total para evitar el síndrome de burnout.", "El estudio exclusivo de la fisiopatología molecular.", "La competencia comercial de la clínica."], c: 0 },
+        { q: "19. Las Guías de BPSO de la RNAO enfatizan que el 'Cuidado Centrado en la Persona' implica:", a: ["Tomar decisiones clínicas sin consultar al paciente.", "Integrar los valores, preferencias y necesidades expresadas por el usuario y su familia en la toma de decisiones.", "Atender sólo los aspectos biológicos urgentes.", "Aplicar el mismo plan de cuidados a todos los pacientes por igual."], c: 1 },
+        { q: "20. Florence Nightingale sostenía que la enfermedad era un proceso:", a: ["Destructivo que la enfermera debía combatir con fármacos.", "Reparador instaurado por la naturaleza para remediar un proceso de intoxicación o deterioro.", "Exclusivamente mental sin base física.", "Castigo divino inalterable."], c: 1 },
+        { q: "21. Un niño que sufre las consecuencias del desempleo de sus padres (entorno laboral donde el niño no está presente) experimenta un impacto a nivel del:", a: ["Microsistema", "Exosistema", "Macrosistema", "Cronosistema"], c: 1 },
+        { q: "22. La aparición de bacterias multirresistentes por uso indiscriminado de antibióticos en la ganadería es un problema abordado prioritaria y holísticamente por:", a: ["El modelo de Virginia Henderson.", "El enfoque One Health (Una Sola Salud).", "La teoría del déficit de autocuidado.", "El modelo de conservación de Levine."], c: 1 },
+        { q: "23. En el Modelo de Roy, un 'Estímulo Residual' se caracteriza por ser:", a: ["El centro de atención del paciente en el momento presente.", "Un factor del pasado, creencia o actitud que puede estar influyendo pero cuyo impacto es difícil de medir.", "El diagnóstico médico definitivo.", "El signo vital alterado."], c: 1 },
+        { q: "24. El Modo Adaptativo de 'Función de Rol' según Roy evalúa:", a: ["La capacidad de realizar la digestión.", " Los papeles primarios, secundarios o terciarios que desempeña la persona en la sociedad y el cumplimiento de sus expectativas.", "El nivel de autoestima corporal.", "La función del sistema nervioso central."], c: 1 },
+        { q: "25. En el modelo de Orem, 'Demanda de Autocuidado Terapéutico' se define como:", a: ["El número de enfermeras necesarias en un turno.", "El total de acciones de cuidado necesarias durante un tiempo determinado para satisfacer todos los requisitos de autocuidado.", "El costo económico de la consulta médica.", "Las exigencias de la administración hospitalaria."], c: 1 },
+        { q: "26. Un paciente con fractura de ambas extremidades superiores que no puede alimentarse ni asearse requiere un Sistema de Enfermería de Orem:", a: ["Apoyo Educativo", "Parcialmente Compensatorio", "Totalmente Compensatorio", "Orientativo"], c: 2 },
+        { q: "27. ¿Qué nivel de la estructura de Fawcett describe la visión del mundo o filosofía general de la disciplina sobre el ser humano y el ambiente?", a: ["Indicadores Empíricos", "Filosofías de Enfermería", "Teorías de Mediano Rango", "Guías de Procedimiento"], c: 1 },
+        { q: "28. Según Carper, el 'Saber Ético' en enfermería va más allá de los códigos deontológicos e incluye:", a: ["La destreza en la canalización de vías venosas.", "La evaluación de voluntades, valores y la adopción de decisiones morales en situaciones complejas.", "La memorización de las dosis de medicamentos.", "La aplicación de fórmulas matemáticas en dosis."], c: 1 },
+        { q: "29. ¿Qué diferencia clave existe entre una 'Grand Teoría' y una 'Teoría de Mediano Rango' según Fawcett?", a: ["Las Grandes Teorías son más concretas y específicas.", "Las Teorías de Mediano Rango tienen conceptos más concretos, delimitados y directamente probables en la práctica.", "Las Grandes Teorías sólo aplican a la pediatría.", "No existe diferencia entre ambas."], c: 1 },
+        { q: "30. En la teoría de Benner, el término 'Saber Práctico' (Knowing Without Knowing How) se refiere a:", a: ["Conocimiento teórico sin aplicación.", "Conocimiento encarnado en la práctica que se adquiere a través de la experiencia clínica acumulada.", "Adivinación sin base científica.", "Seguir instrucciones escritas al pie de la letra."], c: 1 },
+        { q: "31. ¿Cuál es un postulado clave del 'Cuidado Transpersonal' de Jean Watson?", a: ["El enfermero y el paciente son independientes y no influyen el uno en el otro.", "El cuidado transpersonal trasciende el ego y el espacio-tiempo en la conexión con el otro.", "El foco único es la curación biológica del órgano enfermo.", "La enfermera debe imponer sus creencias al usuario."], c: 1 },
+        { q: "32. Las Guías de Liderazgo BPSO/RNAO aconsejan que para lograr cambios sostenibles en la práctica clínica se debe implementar:", a: ["Liderazgo transformacional y gestión del cambio participativa con los equipos de base.", "Órdenes directas e impositivas sin explicación.", "Sanciones pecuniarias al personal.", "Eliminación de la capacitación continua."], c: 0 },
+        { q: "33. Para Florence Nightingale, la 'Higiene del Paciente y del Medio' tenía como objetivo principal:", a: ["Agradar a los familiares del paciente.", "Prevenir la acumulación de materia orgánica en descomposición y reducir la carga mórbida.", "Cumplir con la visita del director del hospital.", "Gastar los insumos de aseo del servicio."], c: 1 },
+        { q: "34. Un cambio en las leyes nacionales de salud que financia el acceso universal a ciertos tratamientos se clasifica en el modelo de Bronfenbrenner como un efecto del:", a: ["Microsistema", "Mesosistema", "Macrosistema", "Cronosistema"], c: 2 },
+        { q: "35. ¿Cómo contribuye la deforestación a la emergencia de zoonosis según el modelo One Health?", a: ["No tiene relación alguna.", "Al alterar los hábitats naturales, incrementa el contacto entre seres humanos, fauna silvestre y vectores patógenos.", "Disminuye la cantidad de virus en el planeta.", "Mejora la salud animal automáticamente."], c: 1 },
+        { q: "36. En el Modelo de Roy, el subsistema 'Regulador' opera principalmente a través de:", a: ["Canales neuroendocrinos, automáticos y fisiológicos.", "Razonamiento lógico deductivo.", "Estrategias de afrontamiento secundarias.", "El lenguaje verbal y no verbal."], c: 0 },
+        { q: "37. La 'Desviación de la Salud' según Orem representa un requisito de autocuidado que surge cuando el individuo:", a: ["Nace sin patologías.", "Sufre una enfermedad, lesión, incapacidad o se somete a diagnóstico y tratamiento médico.", "Atraviesa la pubertad.", "Satisface sus necesidades de hidratación."], c: 1 },
+        { q: "38. ¿Cuál de los siguientes es un ejemplo de 'Teoría de Mediano Rango'?", a: ["Teoría de la Incertidumbre ante la Enfermedad de Merle Mishel.", "Modelo de Sistemas de Betty Neuman.", "Modelo de Adaptación de Callista Roy.", "Filosofía del Cuidado de Watson."], c: 0 },
+        { q: "39. Virginia Henderson agrupa sus 14 necesidades fundamentales en varias dimensiones. ¿Cuáles son?", a: ["Únicamente Fisiológicas.", "Fisiológicas, Psicológicas, Sociales y Espirituales.", "Biológicas y Químicas exclusivamente.", "Financieras y Legales."], c: 1 },
+        { q: "40. Para Benner, el paso de 'Novato' a 'Experto' implica transformar la percepción de la situación clínica desde:", a: ["Piezas de información aisladas e inconexas hacia una visión holística y contextualizada.", "Una visión profunda e intuitiva hacia la memorización de listas fijas de verificación.", "La práctica intuitiva hacia el seguimiento estricto de protocolos teóricos.", "La autonomía total hacia la dependencia del médico."], c: 0 }
+    ],
+    C: [
+        { q: "1. ¿Qué nivel de la jerarquía de Fawcett representa el marco filosófico más amplio que define los cuatro conceptos globales de la disciplina?", a: ["Grandes Teorías", "Metaparadigma", "Indicadores Empíricos", "Modelos Conceptuales"], c: 1 },
+        { q: "2. Según Barbara Carper, el 'Patrón del Conocimiento Personal' requiere que la profesional de enfermería:", a: ["Se distancie afectivamente de los pacientes.", "Desarrolle la autoconciencia y reconozca al paciente como un 'otro' subjetivo en una relación genuina.", "Memorice todas las patologías complejas.", "Siga las instrucciones operativas sin dudar."], c: 1 },
+        { q: "3. ¿Cuál de los siguientes patrones de Carper se enfoca en cuestionar las estructuras de poder y las injusticias en el sistema de salud?", a: ["Patrón Estético", "Patrón Empírico", "Patrón Emancipatorio", "Patrón Ético"], c: 2 },
+        { q: "4. Según Patricia Benner, una enfermera en la etapa 'Avanzada / Principiante Avanzado':", a: ["Formula planes de cuidado estratégicos a largo plazo.", "Identifica 'aspectos' de situaciones reales tras haber tenido cierta experiencia directa previa.", "Actúa por intuición experta sin titubeos.", "Desconoce los conceptos básicos aprendidos en la universidad."], c: 1 },
+        { q: "5. ¿Cuál es el motor principal de progresión de una etapa a otra en el modelo de Patricia Benner?", a: ["El paso de los años de edad cronológica de la enfermera.", "La experiencia clínica reflexionada en la práctica real.", "La acumulación de títulos universitarios teóricos sin práctica.", "La aprobación de exámenes escritos."], c: 1 },
+        { q: "6. En la Teoría del Cuidado Humano de Jean Watson, los 'Factores Caritas' integran:", a: ["Estrategias puramente administrativas de gestión de camas.", "La ciencia del cuidar unida a la dimensión espiritual, el amor y la condición humana.", "El uso exclusivo de la tecnología médica de última generación.", "Las tablas de dosis farmacológicas."], c: 1 },
+        { q: "7. Las Guías de Liderazgo BPSO/RNAO señalan que la 'Práctica Basada en la Evidencia' (PBE) consiste en la integración de:", a: ["Sólo los estudios científicos publicados sin considerar al paciente.", "La mejor evidencia de investigación, la pericia clínica y los valores/preferencias del paciente.", "Las costumbres e inercias históricas del hospital.", "Las órdenes administrativas de la jefatura."], c: 1 },
+        { q: "8. Florence Nightingale enfatizaba la importancia del 'Calor Humano y Corporal' del paciente, aconsejando:", a: ["Mantener las ventanas cerradas en todo momento.", "Controlar la ventilación para asegurar aire puro sin enfriar al paciente mediante el uso de mantas o bolsas calientes.", "Aumentar la temperatura ambiente a más de 35°C.", "Evitar el uso de ropa de cama."], c: 1 },
+        { q: "9. En la Teoría Bioecológica de Bronfenbrenner, la interacción entre el hogar del paciente y el centro de salud donde se rehabilita se denomina:", a: ["Microsistema", "Mesosistema", "Exosistema", "Macrosistema"], c: 1 },
+        { q: "10. La iniciativa 'One Health' reconoce que la emergencia de enfermedades infecciosas emergentes (como pandemias) proviene en más de un 60% de origen:", a: ["Sintético o de laboratorio.", "Zoonótico (transmisión entre animales y humanos).", "Genético hereditario puro.", "Nutricional por falta de vitaminas."], c: 1 },
+        { q: "11. En el Modelo de Adaptación de Roy, cuando la persona logra mantener su integridad ante los cambios del entorno, se habla de una respuesta:", a: ["Ineficaz", "Adaptativa", "Residual", "Cognitiva"], c: 1 },
+        { q: "12. El Modo Adaptativo de 'Autoconcepto' en el modelo de Roy se refiere a:", a: ["La capacidad fisiológica de oxigenación.", "Los aspectos psíquicos y espirituales de la persona, incluyendo la integridad física y el yo personal.", "Las relaciones de dependencia con otros.", "El cumplimiento del rol profesional."], c: 1 },
+        { q: "13. Según Dorothea Orem, el 'Déficit de Autocuidado' indica que:", a: ["El paciente no quiere colaborar con la enfermera.", "Existe una brecha entre la capacidad de la persona para cuidarse y la cantidad/tipo de cuidado requerido.", "El familiar a cargo no pagó la cuenta hospitalaria.", "La enfermera debe dar el alta de inmediato."], c: 1 },
+        { q: "14. Cuando un paciente aprende a aplicarse curaciones planas y a monitorear signos de infección con la supervisión educativa del profesional, según Orem se utiliza un sistema:", a: ["Totalmente Compensatorio", "Parcialmente Compensatorio", "Apoyo Educativo / Apoyo-Enseñanza", "Incapacitante"], c: 2 },
+        { q: "15. La definición de salud según Virginia Henderson se fundamenta en:", a: ["La ausencia total de cualquier germen en el cuerpo.", "La capacidad del individuo para funcionar independientemente en la satisfacción de sus 14 necesidades básicas.", "El cumplimiento estricto de las prescripciones médicas.", "Un estado estático e inalterable de bienestar."], c: 1 },
+        { q: "16. En la jerarquía del conocimiento de Fawcett, ¿qué elemento conecta directamente la teoría abstracta con la realidad clínica medible?", a: ["El Metaparadigma", "Los Indicadores Empíricos", "Las Filosofías", "Los Modelos Conceptuales"], c: 1 },
+        { q: "17. Según Carper, la capacidad de una enfermera para conectar empáticamente de forma no verbal con el dolor de un paciente se atribuye principalmente al:", a: ["Patrón Empírico", "Patrón Estético", "Patrón Lógico", "Patrón Estadístico"], c: 1 },
+        { q: "18. Para Benner, en la etapa 'Experto', la toma de decisiones se distingue por:", a: ["Utilizar siempre algoritmos paso a paso.", "Captar intuitivamente el problema central sin perder tiempo en alternativas innecesarias.", "Consultar siempre con un superior antes de actuar.", "Depender de las normas del servicio."], c: 1 },
+        { q: "19. Jean Watson señala que la pérdida del cuidado humano (*caring*) en los sistemas de salud conduce a:", a: ["Una mayor eficiencia económica.", "La deshumanización, la cura puramente técnica y la mecanización de la atención.", "Una mejor relación paciente-enfermera.", "El aumento de la satisfacción del usuario."], c: 1 },
+        { q: "20. Las Guías de Liderazgo BPSO/RNAO destacan que para sostener la excelencia en los cuidados es fundamental:", a: ["Fomentar un entorno organizacional abierto al aprendizaje y al apoyo entre pares.", "Mantener la práctica tradicional basada en 'siempre se ha hecho así'.", "Evitar evaluar los resultados clínicos.", "Reducir la comunicación entre los equipos de enfermería."], c: 0 },
+        { q: "21. Florence Nightingale afirmaba que la suciedad en el entorno y en las sábanas produce:", a: ["Una aceleración de la cicatrización.", "La reabsorción de venenos hacia el propio organismo del paciente.", "Un estado de relajación profunda.", "Ningún efecto medible en la salud."], c: 1 },
+        { q: "22. La teoría Bioecológica de Bronfenbrenner enfatiza que el desarrollo humano es el resultado de la interacción entre:", a: ["La genética únicamente.", "La persona biológica y los múltiples entornos interconectados a lo largo del tiempo.", "Las decisiones individuales aisladas.", "Los factores económicos exclusivamente."], c: 1 },
+        { q: "23. En el enfoque 'One Health', el concepto de resistencia a los antimicrobianos (RAM) se aborda considerando:", a: ["Exclusivamente la prescripción de médicos en hospitales.", "El uso masivo de antibióticos en la producción animal, la contaminación ambiental y la medicina humana.", "Únicamente la falta de higiene de las manos de los pacientes.", "Las mutaciones genéticas naturales no prevenibles."], c: 1 },
+        { q: "24. En el Modelo de Roy, cuando la persona reacciona ante un estresor activando respuestas neuroendocrinas de lucha o huida, está utilizando el subsistema:", a: ["Cognitivo", "Regulador", "Interdependiente", "Rol Secundario"], c: 1 },
+        { q: "25. El Modo Adaptativo de 'Interdependencia' según Roy se centra en:", a: ["La integridad física del cuerpo.", "Las relaciones afectivas con personas significativas y los sistemas de apoyo social.", "El desempeño del trabajo profesional.", "El equilibrio de líquidos y electrólitos."], c: 1 },
+        { q: "26. Según Orem, los 'Factores Condicionantes Básicos' incluyen elementos que modifican las necesidades de autocuidado, tales como:", a: ["Edad, sexo, estado de desarrollo, estado de salud y recursos socioculturales.", "El número de médicos presentes en la sala.", "El tipo de infraestructura física del hospital exclusivamente.", "Las preferencias personales de la enfermera."], c: 0 },
+        { q: "27. Un paciente postoperado inmediato de cirugía cardiaca en UCI que requiere ventilación mecánica y sedación profunda necesita un Sistema de Enfermería de Orem:", a: ["Apoyo Educativo", "Parcialmente Compensatorio", "Totalmente Compensatorio", "Autónomo"], c: 2 },
+        { q: "28. En la estructura del conocimiento, las 'Filosofías de Enfermería':", a: ["Proporcionan guías de procedimiento detalladas paso a paso.", "Establecen el significado general de la enfermería y del cuidado a través del análisis, el razonamiento y la lógica.", "Miden variables cuantitativas clínicas específicas.", "Son equivalentes a los manuales de farmacia."], c: 1 },
+        { q: "29. ¿Qué patrón de Carper se ejercita cuando una enfermera reflexiona sobre sus propios prejuicios al atender a un paciente con estilo de vida opuesto al suyo?", a: ["Empírico", "Personal", "Estético", "Matemático"], c: 1 },
+        { q: "30. Según Benner, la persona en la etapa 'Competente':", a: ["Sigue ciega e inflexiblemente las reglas de los manuales sin entender el contexto.", "Planifica su atención con sentido de organización y prioridad a largo plazo, aunque le falta rapidez intuitiva.", "Toma decisiones sin ninguna base racional.", "No puede priorizar entre tareas urgentes e importantes."], c: 1 },
+        { q: "31. Watson define la 'Salud' no solo como la ausencia de enfermedad, sino como:", a: ["El logro de altos ingresos económicos.", "La armonía y unidad entre la mente, el cuerpo y el alma / espíritu.", "La capacidad de correr largas distancias.", "La ausencia de síntomas percibidos por el médico."], c: 1 },
+        { q: "32. Un pilar del Liderazgo transformacional en el modelo BPSO/RNAO es el desarrollo de la 'Capacidad Organizacional', la cual busca:", a: ["Crear culturas de trabajo seguras, de apoyo continuo e innovación en la gestión del cuidado.", "Aumentar la carga laboral sin recursos.", "Controlar de forma punitiva cada acción del personal.", "Centralizar todas las decisiones en una sola persona."], c: 0 },
+        { q: "33. La recomendación de Nightingale sobre 'mantener al paciente en un ambiente silencioso' respondía a que el ruido inútil:", a: ["Aumentaba el gasto de energía vital y el estrés del enfermo obstaculizando su curación.", "Impedía que el médico escuchara los ruidos cardíacos.", "Dañaba la infraestructura de la sala.", "Causaba molestias sólo al personal técnico."], c: 0 },
+        { q: "34. Un evento sociocultural e histórico masivo como una pandemia o una crisis económica global que afecta las condiciones de vida de toda una generación se clasifica en Bronfenbrenner como:", a: ["Microsistema", "Mesosistema", "Exosistema", "Cronosistema / Macrosistema"], c: 3 },
+        { q: "35. El concepto de 'Agencia de Enfermería' en la teoría de Dorothea Orem se refiere a:", a: ["La compañía aseguradora que paga las prestaciones.", "Las capacidades educadas y entrenadas de los profesionales de enfermería para satisfacer las demandas de autocuidado de otros.", "El establecimiento físico del consultorio.", "El contrato de trabajo del personal."], c: 1 },
+        { q: "36. Según Callista Roy, el objetivo final del cuidado de enfermería es:", a: ["Curar las patologías biológicas sin importar la respuesta del paciente.", "Promover la adaptación de la persona en los 4 modos adaptativos para contribuir a la salud, calidad de vida y morir con dignidad.", "Sustituir las decisiones de la persona de por vida.", "Reducir los tiempos de estadía hospitalaria únicamente."], c: 1 },
+        { q: "37. Las 14 Necesidades de Virginia Henderson son consideradas un modelo funcional porque:", a: ["Permiten estructurar la valoración del paciente de forma integral abarcando aspectos biológicos, psicológicos y sociales.", "Solo aplican para la atención de pacientes ancianos.", "Son exclusivas para áreas quirúrgicas.", "Reemplazan completamente la valoración médica."], c: 0 },
+        { q: "38. En la jerarquía de Fawcett, la Teoría de la Maternidad de Ramona Mercer se clasifica como:", a: ["Metaparadigma", "Grand Teoría", "Teoría de Mediano Rango", "Indicador Empírico"], c: 2 },
+        { q: "39. Un principio ético central en la teoría de Jean Watson es el respeto a la 'Dignidad Humana', lo cual requiere:", a: ["Tratar al paciente como un objeto pasivo de procedimientos.", "Reconocer la autonomía, valores y espiritualidad del ser humano en todo momento del proceso de cuidar.", "Priorizar la velocidad del procedimiento por encima del trato al paciente.", "Decidir por el usuario sin informarle."], c: 1 },
+        { q: "40. Las Guías de Buenas Prácticas de la RNAO recomiendan que para lograr una implementación exitosa de la evidencia se deben designar liderazgos clínicos locales conocidos como:", a: ["Inspectores punitivos.", "Champions / Impulsores de Buenas Prácticas (Champions de Enfermería).", "Auditores financieros.", "Supervisores de turno tradicionales."], c: 1 }
+    ]
+};
+
+let currentExamKey = 'A';
+const letterMap = ['A', 'B', 'C', 'D'];
+
+function loadExam(examKey) {
+    currentExamKey = examKey;
+    document.querySelectorAll('.exam-selector .btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    document.getElementById('resultContainer').style.display = 'none';
+    
+    const container = document.getElementById('questionsContainer');
+    container.innerHTML = '';
+    
+    const questions = examsData[examKey];
+    questions.forEach((qObj, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.id = `q_card_${index}`;
+        
+        let optionsHtml = '';
+        qObj.a.forEach((optText, optIdx) => {
+            optionsHtml += `
+                <label class="option" id="label_${index}_${optIdx}">
+                    <input type="radio" name="q_${index}" value="${optIdx}">
+                    <span><strong>${letterMap[optIdx]})</strong> ${optText}</span>
+                </label>
+            `;
+        });
+        
+        card.innerHTML = `
+            <div class="question-title">${qObj.q}</div>
+            <div class="options">${optionsHtml}</div>
+            <div class="feedback hidden" id="fb_${index}"></div>
+        `;
+        container.appendChild(card);
+    });
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function submitExam() {
+    const questions = examsData[currentExamKey];
+    let score = 0;
+    const keyGrid = document.getElementById('keyGrid');
+    keyGrid.innerHTML = '';
+    
+    questions.forEach((qObj, index) => {
+        const selected = document.querySelector(`input[name="q_${index}"]:checked`);
+        const card = document.getElementById(`q_card_${index}`);
+        const fb = document.getElementById(`fb_${index}`);
+        fb.classList.remove('hidden', 'correct-ans', 'incorrect-ans');
+        
+        let userAns = selected ? parseInt(selected.value) : -1;
+        let isCorrect = (userAns === qObj.c);
+        
+        if (isCorrect) {
+            score++;
+            fb.classList.add('correct-ans');
+            fb.innerHTML = ` Correcto. Respuesta: ${letterMap[qObj.c]}`;
+        } else {
+            fb.classList.add('incorrect-ans');
+            let userAnsStr = userAns !== -1 ? letterMap[userAns] : 'Sin responder';
+            fb.innerHTML = ` Incorrecto. Tu respuesta: ${userAnsStr} | Correcta: ${letterMap[qObj.c]}`;
+        }
+        
+        const keyItem = document.createElement('div');
+        keyItem.className = `key-item ${isCorrect ? 'correct-ans' : 'incorrect-ans'}`;
+        keyItem.innerHTML = `${index + 1}: ${letterMap[qObj.c]}`;
+        keyGrid.appendChild(keyItem);
+    });
+    
+    const percentage = ((score / questions.length) * 100).toFixed(1);
+    document.getElementById('scoreDisplay').innerText = `${score} / ${questions.length}`;
+    document.getElementById('percentageDisplay').innerText = `Rendimiento: ${percentage}%`;
+    
+    const resContainer = document.getElementById('resultContainer');
+    resContainer.style.display = 'block';
+    resContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Cargar Examen A al iniciar
+window.onload = function() {
+    loadExam('A');
+};
+</script>
+
+</body>
+</html>
