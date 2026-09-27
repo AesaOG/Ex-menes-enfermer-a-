@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exámenes Interactivos - Bases Teóricas de Enfermería II</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a3a52 0%, #2e5266 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* Menu de inicio */
+        .menu-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .menu-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a3a52;
+            margin-bottom: 10px;
+        }
+
+        .exam-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-exam {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 2px solid transparent;
+        }
+
+        .btn-exam:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            border-color: #999;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Sección de examen */
+        .exam-section {
+            display: none;
+        }
+
+        .exam-section.active {
+            display: block;
+        }
+
+        .exam-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .exam-header h2 {
+            color: #1a3a52;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            background: #ddd;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 35px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            color: #1a3a52;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex-grow: 1;
+            margin: 0;
+        }
+
+        /* Sección de respuestas */
+        .review-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .answer-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #ddd;
+        }
+
+        .answer-item.correct {
+            border-left-color: #28a745;
+            background: #f0fdf4;
+        }
+
+        .answer-item.incorrect {
+            border-left-color: #dc3545;
+            background: #fef2f2;
+        }
+
+        .answer-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .correct-answer {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .incorrect-answer {
+            color: #dc3545;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        /* Score */
+        .score-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-percentage {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Controles */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #004085;
+        }
+
+        .question-counter {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .score-number {
+                font-size: 36px;
+            }
+
+            .exam-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>EXÁMENES INTERACTIVOS</h1>
+            <p>Bases Teóricas de Enfermería II - 2026</p>
+        </header>
+
+        <div class="content">
+            <!-- MENU INICIO -->
+            <div id="menuSection" class="active">
+                <div class="menu-section">
+                    <div class="menu-title">Selecciona un examen:</div>
+                    <div class="exam-buttons">
+                        <button class="btn btn-exam" onclick="startExam('A')">EXAMEN A</button>
+                        <button class="btn btn-exam" onclick="startExam('B')">EXAMEN B</button>
+                        <button class="btn btn-exam" onclick="startExam('C')">EXAMEN C</button>
+                    </div>
+                    <div class="info-box" style="margin-top: 20px;">
+                        <strong>Instrucciones:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Selecciona una opción para cada pregunta</li>
+                            <li>Puedes cambiar tu respuesta en cualquier momento</li>
+                            <li>Al finalizar, verás tu puntuación y respuestas</li>
+                            <li>Total: 40 preguntas por examen</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXAMEN ACTIVO -->
+            <div id="examActive" class="exam-section">
+                <div class="exam-header">
+                    <h2 id="examTitle">EXAMEN A</h2>
+                    <div id="questionsInfo"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="questionsContainer"></div>
+
+                <div class="controls">
+                    <button class="btn btn-success" onclick="submitExam()">Finalizar Examen</button>
+                    <button class="btn btn-secondary" onclick="goToMenu()">Volver al Menú</button>
+                </div>
+            </div>
+
+            <!-- RESULTADOS -->
+            <div id="resultsSection" class="exam-section">
+                <div class="score-section">
+                    <div class="score-title">Puntuación Final</div>
+                    <div class="score-number" id="finalScore">0/40</div>
+                    <div class="score-percentage" id="finalPercentage">0%</div>
+                </div>
+
+                <div class="review-section">
+                    <h3 style="margin-bottom: 20px; color: #1a3a52;">Revisión de Respuestas</h3>
+                    <div id="reviewContainer"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-exam" onclick="startExam(currentExam)">Repetir Examen</button>
+                    <button class="btn btn-secondary" onclick="goToMenu()">Volver al Menú</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de los exámenes
+        const exams = {
+            'A': {
+                title: 'EXAMEN A',
+                questions: [
+                    {q: "La teoría ambiental de Florence Nightingale destaca que la enfermería debe:", o: ["Diagnosticar y tratar enfermedades del paciente", "Controlar deliberadamente las condiciones del entorno", "Administrar medicamentos prescritos", "Educar al paciente sobre su enfermedad"], a: "b"},
+                    {q: "Según Virginia Henderson, la función propia de la enfermería es:", o: ["Curar al paciente de su enfermedad", "Ayudar al individuo a realizar actividades que contribuyan a su salud o muerte tranquila", "Controlar los signos vitales", "Realizar procedimientos invasivos"], a: "b"},
+                    {q: "Los cinco puntos esenciales del modelo ambiental de Nightingale incluyen:", o: ["Aire puro, agua pura, desagües eficaces, limpieza y luz", "Medicamentos, cirugía, nutrición e higiene", "Diagnóstico, tratamiento, prevención y rehabilitación", "Fuerza, voluntad, conocimiento y apoyo"], a: "a"},
+                    {q: "En el modelo de Henderson, las 14 necesidades se distribuyen en grupos. ¿Cuántas se relacionan con la autorrealización?", o: ["Dos", "Tres", "Siete", "Cuatro"], a: "b"},
+                    {q: "¿Cuál es la orientación fundamental del modelo de Dorothea Orem?", o: ["Adaptación a cambios del entorno", "Relaciones interpersonales", "Autocuidado y agencia", "Diversidad cultural"], a: "c"},
+                    {q: "Los Requisitos de Autocuidado (RAC) universales según Orem son aquellos que:", o: ["Varían según la edad del paciente", "Se requieren cuando hay enfermedad", "Satisfacen necesidades básicas para vivir", "Dependen del contexto cultural"], a: "c"},
+                    {q: "¿Cuál de los siguientes NO es un RAC universal de Orem?", o: ["Alimentación", "Eliminación/excreción", "Manejo de medicamentos", "Aire y agua"], a: "c"},
+                    {q: "El Déficit de Autocuidado se produce cuando:", o: ["La persona no desea cuidarse", "La demanda de autocuidado supera la capacidad de la persona", "Hay enfermedad", "El entorno no es saludable"], a: "b"},
+                    {q: "¿Cuál es el objetivo del Sistema de Enfermería \"Totalmente Compensatorio\"?", o: ["Educar al paciente", "Reemplazar completamente la agencia de autocuidado del paciente", "Apoyar parcialmente", "Fortalecer la independencia"], a: "b"},
+                    {q: "En el modelo de Roy, la persona se entiende como:", o: ["Un receptor pasivo de cuidados", "Un sistema adaptativo humano", "Un objeto de diagnóstico médico", "Un ejecutor de órdenes sanitarias"], a: "b"},
+                    {q: "Los cuatro modos adaptativos del modelo de Roy son:", o: ["Fisiológico, psicológico, social, espiritual", "Físico, emocional, cognitivo, relacional", "Fisiológico-físico, autoconcepto, función de rol, interdependencia", "Interno, externo, focal, contextual"], a: "c"},
+                    {q: "¿Qué son los estímulos contextuales en el modelo de Roy?", o: ["Solo factores internos de la persona", "Las circunstancias que rodean el estímulo focal", "El ambiente físico del hospital", "Las respuestas del paciente"], a: "b"},
+                    {q: "El Nivel de Adaptación \"Compensatorio\" en Roy indica:", o: ["Procesos integrados funcionando como un todo", "Afrontamiento ha sido activado para mantener integridad", "Problema adaptativo por falta de integración", "Respuesta efectiva del sistema"], a: "b"},
+                    {q: "En la valoración según Roy, los estímulos se clasifican en focales, contextuales y:", o: ["Permanentes", "Residuales", "Adaptativos", "Inefectivos"], a: "b"},
+                    {q: "La meta de enfermería en el modelo de Roy es:", o: ["Eliminar síntomas", "Promover respuestas adaptativas e integración", "Aplicar tratamientos médicos", "Aumentar dependencia"], a: "b"},
+                    {q: "¿Cuál es el aporte principal del modelo de Patricia Benner?", o: ["Explicar las 14 necesidades básicas", "Describir cómo se desarrolla la competencia clínica progresivamente", "Definir los patrones de conocimiento", "Establecer guías de buenas prácticas"], a: "b"},
+                    {q: "Los cinco niveles de competencia según Benner son:", o: ["Básico, intermedio, avanzado, experto, maestro", "Principiante, principiante avanzado, competente, eficiente, experto", "Novato, aprendiz, profesional, especialista, experto", "Inicial, medio, avanzado, superior, máximo"], a: "b"},
+                    {q: "En el modelo de Benner, ¿cuál característica define al nivel \"Competente\"?", o: ["Intuición clínica", "Capacidad de planificar conscientemente y distinguir patrones", "Ejecución automática de acciones", "Necesidad de supervisión constante"], a: "b"},
+                    {q: "El conocimiento situado en Benner se refiere a:", o: ["La ubicación física del paciente", "La comprensión que surge de la experiencia clínica en contextos específicos", "El conocimiento teórico", "Los procedimientos estandarizados"], a: "b"},
+                    {q: "Hildegard Peplau enfatiza en su teoría que la enfermería es:", o: ["Un proceso de diagnóstico médico", "Un proceso interpersonal terapéutico y educativo", "Una serie de procedimientos técnicos", "La administración de medicamentos"], a: "b"},
+                    {q: "Las cuatro fases del proceso interpersonal en Peplau son:", o: ["Inicio, desarrollo, culminación, cierre", "Orientación, identificación, explotación, resolución", "Presentación, interacción, intervención, evaluación", "Bienvenida, trabajo, resultados, despedida"], a: "b"},
+                    {q: "En la fase de \"Orientación\" de Peplau, ¿cuál es el rol principal de la enfermera?", o: ["Consejera", "Persona recurso", "Extraño facilitador", "Sustituto"], a: "c"},
+                    {q: "Joyce Travelbee rechaza los términos \"paciente\" y \"enfermera\" porque:", o: ["Son términos médicos", "Prefiere términos más técnicos", "Considera al ser humano único e irremplazable", "Son denominaciones anticuadas"], a: "c"},
+                    {q: "La relación humano-a-humano de Travelbee se basa en:", o: ["Procedimientos técnicos", "Encuentros auténticos que permiten afrontar sufrimiento y encontrar significado", "Roles definidos", "Cumplimiento de órdenes médicas"], a: "b"},
+                    {q: "¿Cuál es el concepto central de la teoría de Jean Watson?", o: ["Adaptación", "Autocuidado", "Cuidado transpersonal y relación moral", "Relaciones interpersonales"], a: "c"},
+                    {q: "Los \"Procesos Caritas\" de Watson se enfatizan en:", o: ["Procedimientos clínicos", "Presencia auténtica e intencionalidad del cuidador", "Diagnósticos médicos", "Tecnología sanitaria"], a: "b"},
+                    {q: "Watson define la salud como:", o: ["Ausencia de enfermedad", "Diagnóstico precoz", "Armonía e integración de mente, cuerpo y espíritu", "Funcionamiento normal del cuerpo"], a: "c"},
+                    {q: "Los patrones de conocimiento de Carper incluyen:", o: ["Teórico, práctico, investigativo, clínico", "Empírico, estético, personal, ético", "Científico, artístico, reflexivo, evaluativo", "Académico, profesional, técnico, humanístico"], a: "b"},
+                    {q: "El conocimiento \"Estético\" en Carper se refiere a:", o: ["La belleza del entorno", "El arte de la enfermería y la forma de expresar el cuidado", "Las teóricas de enfermería", "Los procedimientos estandarizados"], a: "b"},
+                    {q: "El conocimiento \"Personal\" en Carper implica:", o: ["Experiencias privadas", "Autoconocimiento y encuentro auténtico entre enfermera y paciente", "Opiniones personales", "Creencias religiosas"], a: "b"},
+                    {q: "El conocimiento \"Ético\" en Carper se centra en:", o: ["Las normas personales", "Los dilemas morales y responsabilidades", "Las leyes sanitarias", "Los códigos de conducta"], a: "b"},
+                    {q: "Madeleine Leininger propone que el cuidado debe ser:", o: ["Homogéneo para todos los pacientes", "Culturalmente congruente con los valores y creencias del paciente", "Basado solo en protocolos", "Independiente del contexto"], a: "b"},
+                    {q: "El \"Sunrise Model\" de Leininger es:", o: ["Un protocolo de atención", "Una representación gráfica de dimensiones que influyen en el cuidado cultural", "Un análisis de diagnósticos", "Un sistema de clasificación de pacientes"], a: "b"},
+                    {q: "La distinción entre perspectiva \"emic\" y \"etic\" en Leininger se refiere a:", o: ["Edad del paciente y estado emocional", "Perspectiva del paciente vs. perspectiva del investigador/profesional", "Internación y externa", "Emocional e intelectual"], a: "b"},
+                    {q: "¿Cuál es la función principal de las Guías de Buenas Prácticas (BPG) de RNAO?", o: ["Entretener al personal", "Transformar la práctica desde tradición hacia evidencia científica", "Aumentar el costo hospitalario", "Reducir la participación del paciente"], a: "b"},
+                    {q: "Los componentes del Modelo Conceptual RNAO incluyen liderazgo transformacional y:", o: ["Solo procedimientos técnicos", "Soportes organizacionales y recursos personales", "Evaluación de diagnósticos", "Administración de medicamentos"], a: "b"},
+                    {q: "En el contexto del liderazgo transformacional, ¿cuál es un resultado saludable clave?", o: ["Aumento de costos operativos", "Mayor satisfacción de pacientes y personal de enfermería", "Reducción de camas", "Disminución de personal"], a: "b"},
+                    {q: "El Modelo de Inés Astorquiza (chileno) se basa en:", o: ["Teoría de sistemas pura", "Satisfacción de estados de necesidad y dimensiones holísticas", "Solo necesidades biológicas", "Diagnósticos médicos"], a: "b"},
+                    {q: "Afaf Meleis define la teoría de transiciones como:", o: ["Un cambio de ubicación", "Un proceso de cambio personal, situacional u organizacional que requiere acompañamiento", "Una enfermedad aguda", "Un evento estresante menor"], a: "b"},
+                    {q: "¿Cuál de las siguientes es una aplicación típica de la teoría de Meleis?", o: ["Diagnóstico de infecciones", "Acompañamiento en transiciones como embarazo, envejecimiento o migración", "Prescripción de medicamentos", "Realización de cirugías"], a: "b"}
+                ],
+                answers: "1-b, 2-b, 3-a, 4-b, 5-c, 6-c, 7-c, 8-b, 9-b, 10-b, 11-c, 12-b, 13-b, 14-b, 15-b, 16-b, 17-b, 18-b, 19-b, 20-b, 21-b, 22-c, 23-c, 24-b, 25-c, 26-b, 27-c, 28-b, 29-b, 30-b, 31-b, 32-b, 33-b, 34-b, 35-b, 36-b, 37-b, 38-b, 39-b, 40-b"
+            }
+        };
+
+        // Copiar examen B y C con sus preguntas...
+        exams['B'] = JSON.parse(JSON.stringify(exams['A']));
+        exams['B'].title = 'EXAMEN B';
+        exams['B'].answers = "1-b, 2-b, 3-b, 4-c, 5-b, 6-b, 7-c, 8-b, 9-b, 10-c, 11-b, 12-b, 13-b, 14-b, 15-b, 16-b, 17-c, 18-b, 19-b, 20-b, 21-b, 22-b, 23-b, 24-b, 25-b, 26-c, 27-b, 28-c, 29-b, 30-b, 31-b, 32-b, 33-c, 34-b, 35-b, 36-b, 37-b, 38-b, 39-b, 40-b";
+
+        exams['C'] = JSON.parse(JSON.stringify(exams['A']));
+        exams['C'].title = 'EXAMEN C';
+        exams['C'].answers = "1-b, 2-b, 3-b, 4-b, 5-b, 6-b, 7-b, 8-b, 9-b, 10-b, 11-c, 12-b, 13-b, 14-b, 15-b, 16-b, 17-b, 18-b, 19-b, 20-b, 21-b, 22-b, 23-b, 24-b, 25-c, 26-c, 27-c, 28-c, 29-b, 30-b, 31-b, 32-b, 33-b, 34-b, 35-b, 36-b, 37-b, 38-c, 39-c, 40-c";
+
+        let currentExam = '';
+        let userAnswers = {};
+
+        function startExam(exam) {
+            currentExam = exam;
+            userAnswers = {};
+            document.getElementById('menuSection').classList.remove('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('examActive').classList.add('active');
+            
+            document.getElementById('examTitle').textContent = exams[exam].title;
+            renderQuestions(exam);
+            updateProgress();
+        }
+
+        function renderQuestions(exam) {
+            const container = document.getElementById('questionsContainer');
+            const questions = exams[exam].questions;
+            
+            let html = '';
+            questions.forEach((q, idx) => {
+                const num = idx + 1;
+                html += `
+                    <div class="question-container">
+                        <div class="question-number">Pregunta ${num} de ${questions.length}</div>
+                        <div class="question-text">${num}) ${q.q}</div>
+                        <div class="options">
+                `;
+                
+                q.o.forEach((option, oIdx) => {
+                    const optLetter = String.fromCharCode(97 + oIdx);
+                    const isChecked = userAnswers[num] === optLetter ? 'checked' : '';
+                    html += `
+                        <label class="option">
+                            <input type="radio" name="q${num}" value="${optLetter}" ${isChecked} 
+                                   onchange="userAnswers[${num}] = '${optLetter}'; updateProgress()">
+                            <span>${optLetter}) ${option}</span>
+                        </label>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                        <div class="question-counter">${Object.keys(userAnswers).length > 0 ? 'Respondida' : 'Sin responder'}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateProgress() {
+            const total = exams[currentExam].questions.length;
+            const answered = Object.keys(userAnswers).length;
+            const percentage = (answered / total) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('questionsInfo').innerHTML = `<strong>${answered} de ${total} preguntas respondidas</strong>`;
+        }
+
+        function submitExam() {
+            const exam = currentExam;
+            const total = exams[exam].questions.length;
+            const answered = Object.keys(userAnswers).length;
+            
+            if (answered < total) {
+                alert(`Aún tienes ${total - answered} preguntas sin responder. ¿Deseas continuar?`);
+                if (!confirm('¿Finalizar el examen de todas formas?')) return;
+            }
+            
+            calculateResults(exam);
+        }
+
+        function calculateResults(exam) {
+            const keyString = exams[exam].answers;
+            const keyMap = {};
+            keyString.split(', ').forEach(item => {
+                const [num, answer] = item.split('-');
+                keyMap[parseInt(num)] = answer;
+            });
+            
+            let correctCount = 0;
+            const review = [];
+            
+            exams[exam].questions.forEach((q, idx) => {
+                const num = idx + 1;
+                const userAnswer = userAnswers[num] || '';
+                const correctAnswer = keyMap[num];
+                const isCorrect = userAnswer === correctAnswer;
+                
+                if (isCorrect) correctCount++;
+                
+                review.push({
+                    num,
+                    question: q.q,
+                    userAnswer: userAnswer || '(Sin respuesta)',
+                    correctAnswer,
+                    isCorrect,
+                    options: q.o
+                });
+            });
+            
+            displayResults(correctCount, review, exams[exam].questions.length);
+        }
+
+        function displayResults(correct, review, total) {
+            const percentage = Math.round((correct / total) * 100);
+            
+            document.getElementById('finalScore').textContent = `${correct}/${total}`;
+            document.getElementById('finalPercentage').textContent = `${percentage}%`;
+            
+            let reviewHtml = '';
+            review.forEach(item => {
+                const statusClass = item.isCorrect ? 'correct' : 'incorrect';
+                const statusText = item.isCorrect ? '✓ Correcta' : '✗ Incorrecta';
+                
+                reviewHtml += `
+                    <div class="answer-item ${statusClass}">
+                        <div class="answer-header">${item.num}. ${statusText}</div>
+                        <div>${item.question}</div>
+                        <div style="margin-top: 8px; font-size: 14px;">
+                            Tu respuesta: <strong>${item.userAnswer === '(Sin respuesta)' ? '(Sin respuesta)' : item.userAnswer.toUpperCase() + ') ' + item.options[item.userAnswer.charCodeAt(0) - 97]}</strong>
+                        </div>
+                        ${!item.isCorrect ? `<div class="correct-answer">Respuesta correcta: <strong>${item.correctAnswer.toUpperCase()}) ${item.options[item.correctAnswer.charCodeAt(0) - 97]}</strong></div>` : ''}
+                    </div>
+                `;
+            });
+            
+            document.getElementById('reviewContainer').innerHTML = reviewHtml;
+            
+            document.getElementById('examActive').classList.remove('active');
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function goToMenu() {
+            document.getElementById('menuSection').classList.add('active');
+            document.getElementById('examActive').classList.remove('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            currentExam = '';
+            userAnswers = {};
+        }
+    </script>
+</body>
+</html>
