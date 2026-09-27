@@ -364,6 +364,16 @@
                             <li>Total: 40 preguntas por examen</li>
                         </ul>
                     </div>
+
+                    <!-- BOTONES PARA OTROS ARCHIVOS -->
+                    <div class="info-box" style="margin-top: 15px; background: #f3e8ff; border-color: #d8b4fe; color: #581c87;">
+                        <strong>Ver otros archivos de exámenes:</strong>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                            <a href="ExamenesBasesGPT.html" class="btn btn-secondary" style="text-align: center; text-decoration: none; color: #333;">Examen GPT</a>
+                            <a href="ExamenesBasesGemini.html" class="btn btn-secondary" style="text-align: center; text-decoration: none; color: #333;">Examen Gemini</a>
+                            <a href="ExamenesBasesNote.html" class="btn btn-secondary" style="text-align: center; text-decoration: none; color: #333;">Examen Note</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -450,7 +460,7 @@
                     {q: "Los componentes del Modelo Conceptual RNAO incluyen liderazgo transformacional y:", o: ["Solo procedimientos técnicos", "Soportes organizacionales y recursos personales", "Evaluación de diagnósticos", "Administración de medicamentos"], a: "b"},
                     {q: "En el contexto del liderazgo transformacional, ¿cuál es un resultado saludable clave?", o: ["Aumento de costos operativos", "Mayor satisfacción de pacientes y personal de enfermería", "Reducción de camas", "Disminución de personal"], a: "b"},
                     {q: "El Modelo de Inés Astorquiza (chileno) se basa en:", o: ["Teoría de sistemas pura", "Satisfacción de estados de necesidad y dimensiones holísticas", "Solo necesidades biológicas", "Diagnósticos médicos"], a: "b"},
-                    {q: "Afaf Meleis define la teoría de transiciones como:", o: ["Un cambio de ubicación", "Un proceso de cambio personal, situacional u organizacional que requiere acompañamiento", "Una enfermedad aguda", "Un evento estresante menor"], a: "b"},
+                    {q: "Afaf Meleis define la teoría de transiciones como:", o: ["Un cambio de ubicación", "Un proceso de cambio personal, situacional u organizacional que requiere acompañamiento", "Enfermedad aguda", "Evento estresante menor"], a: "b"},
                     {q: "¿Cuál de las siguientes es una aplicación típica de la teoría de Meleis?", o: ["Diagnóstico de infecciones", "Acompañamiento en transiciones como embarazo, envejecimiento o migración", "Prescripción de medicamentos", "Realización de cirugías"], a: "b"}
                 ],
                 answers: "1-b, 2-b, 3-a, 4-b, 5-c, 6-c, 7-c, 8-b, 9-b, 10-b, 11-c, 12-b, 13-b, 14-b, 15-b, 16-b, 17-b, 18-b, 19-b, 20-b, 21-b, 22-c, 23-c, 24-b, 25-c, 26-b, 27-c, 28-b, 29-b, 30-b, 31-b, 32-b, 33-b, 34-b, 35-b, 36-b, 37-b, 38-b, 39-b, 40-b"
@@ -588,7 +598,7 @@
                         <div style="margin-top: 8px; font-size: 14px;">
                             Tu respuesta: <strong>${item.userAnswer === '(Sin respuesta)' ? '(Sin respuesta)' : item.userAnswer.toUpperCase() + ') ' + item.options[item.userAnswer.charCodeAt(0) - 97]}</strong>
                         </div>
-                        ${!item.isCorrect ? `<div class="correct-answer">Respuesta correcta: <strong>${item.correctAnswer.toUpperCase()}) ${item.options[item.correctAnswer.charCodeAt(0) - 97]}</strong></div>` : ''}
+                        ${!item.isCorrect ? `<div class="correct-answer">Respuesta correcta: <strong>${item.correctAnswer.toUpperCase()})${item.options[item.correctAnswer.charCodeAt(0) - 97]}</strong></div>` : ''}
                     </div>
                 `;
             });
